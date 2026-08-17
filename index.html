@@ -139,22 +139,35 @@
     border:1px solid var(--line); background:var(--panel); border-radius:var(--radius);
     padding:14px 16px; margin-bottom:18px;
   }
-  .toolbar .back{color:var(--muted); cursor:pointer; font-family:'JetBrains Mono',monospace; font-size:12.5px; padding-right:6px; border-right:1px solid var(--line); margin-right:4px;}
+  .toolbar .back{color:var(--cyan); cursor:pointer; font-family:'JetBrains Mono',monospace; font-size:13px; font-weight:bold; padding-right:12px; border-right:1px solid var(--line); margin-right:4px;}
   .toolbar .back:hover{color:var(--text);}
   .toolbar .title{font-weight:600; font-size:15px; margin-right:auto;}
   .toolbar .title .tag{color:var(--muted); font-weight:400; font-family:'JetBrains Mono',monospace; font-size:11.5px; margin-left:8px;}
   .field{display:flex; align-items:center; gap:7px; font-family:'JetBrains Mono',monospace; font-size:11.5px; color:var(--muted);}
-  .field select, .field input[type=range]{accent-color:var(--cyan);}
-  select{
+  .field select, .field input{accent-color:var(--cyan);}
+  
+  input[type="number"], input[type="text"], select{
     background:var(--panel2); color:var(--text); border:1px solid var(--line); border-radius:2px;
-    font-family:'JetBrains Mono',monospace; font-size:12px; padding:6px 8px;
+    font-family:'JetBrains Mono',monospace; font-size:12px; padding:6px 8px; cursor:pointer;
   }
+  select:disabled { opacity: 0.5; cursor: not-allowed; }
 
   .stage{
     border:1px solid var(--line); background:var(--panel); border-radius:var(--radius);
     padding:18px; margin-bottom:18px;
   }
   canvas{display:block; width:100%; height:340px;}
+
+  .step-log {
+    margin-top: 14px; height: 120px; overflow-y: auto; background: var(--panel2); 
+    border: 1px solid var(--line); padding: 10px; font-family: 'JetBrains Mono', monospace; 
+    font-size: 11px; color: var(--text); border-radius: var(--radius);
+  }
+  .step-log div { padding: 3px 0; border-bottom: 1px solid var(--line-soft); }
+  .step-log div:last-child { border-bottom: none; }
+  .log-cmp { color: var(--amber); }
+  .log-wr { color: var(--cyan); }
+  .log-done { color: var(--mint); }
 
   .stats{
     display:grid; grid-template-columns:repeat(auto-fit, minmax(140px,1fr)); gap:1px;
@@ -184,9 +197,12 @@
   .cmp-top .note{font-family:'JetBrains Mono',monospace; font-size:10.5px; color:var(--muted2); width:100%; order:99;}
   .cmpgrid{
     display:grid; grid-template-columns:repeat(auto-fill, minmax(260px,1fr)); gap:12px;
+    position: relative;
   }
   .cmpcard{
     border:1px solid var(--line); background:var(--panel); border-radius:var(--radius); padding:12px; position:relative;
+    display: flex; flex-direction: column;
+    will-change: transform;
   }
   .cmpcard.done{border-color:rgba(110,231,168,0.4);}
   .cmpcard .h{display:flex; justify-content:space-between; align-items:baseline; margin-bottom:8px;}
@@ -196,10 +212,35 @@
     padding:2px 6px; border-radius:2px; opacity:0;
   }
   .cmpcard.done .rank{opacity:1; background:var(--mint); color:#062615;}
-  .cmpcard canvas{height:90px; width:100%;}
+  .cmpcard canvas{height:90px; width:100%; margin-top:auto;}
   .cmpcard .foot{display:flex; justify-content:space-between; margin-top:8px; font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--muted);}
   .cmpcard .foot .t{color:var(--amber); font-weight:600;}
   .cmpcard.done .foot .t{color:var(--mint);}
+
+  /* MODAL STYLES */
+  .modal{display:none; position:fixed; z-index:1000; left:0; top:0; width:100%; height:100%; background:rgba(10,14,19,0.85); backdrop-filter:blur(5px);}
+  .modal.active{display:flex; justify-content:center; align-items:center;}
+  .modal-content{background:var(--panel); border:1px solid var(--line); border-radius:var(--radius); width:95%; max-width:900px; display:flex; flex-direction:column; max-height:90vh;}
+  .modal-header{display:flex; justify-content:space-between; padding:16px 20px; border-bottom:1px solid var(--line); align-items:center;}
+  .modal-header h2{font-size:18px;}
+  .close-modal{cursor:pointer; color:var(--muted); font-size:24px; line-height:1;}
+  .close-modal:hover{color:var(--coral);}
+  .modal-body{padding:20px; overflow-y:auto;}
+  .lang-tabs{display:flex; gap:8px; margin-bottom:16px; border-bottom:1px solid var(--line); padding-bottom:12px; flex-wrap:wrap;}
+  .lang-btn{background:var(--panel2); border:1px solid var(--line); color:var(--muted); padding:8px 16px; border-radius:var(--radius); cursor:pointer; font-family:'JetBrains Mono',monospace; font-size:12px;}
+  .lang-btn.active{background:var(--cyan); color:#000; border-color:var(--cyan); font-weight:bold;}
+  
+  .code-wrapper{position:relative; background:#0d1117; border:1px solid var(--line); border-radius:var(--radius); padding:16px; overflow-x:auto; display:none;}
+  .code-wrapper.active{display:block;}
+  .code-wrapper pre{font-family:'JetBrains Mono', monospace; font-size:13px; color:#c9d1d9; line-height:1.5; margin:0;}
+  .copy-btn{position:absolute; top:12px; right:12px; padding:6px 12px;}
+  
+  .concept-wrapper{display:none; background:var(--panel2); border:1px solid var(--line); border-radius:var(--radius); padding:20px; font-size:14.5px; line-height:1.6; color:var(--text);}
+  .concept-wrapper.active{display:block;}
+  .concept-title{font-size:18px; font-weight:bold; color:var(--cyan); margin-bottom:12px;}
+  .concept-boxes { display:flex; gap:8px; flex-wrap:wrap; margin:16px 0; }
+  .c-box { background: #bdf2cc; color:#062615; padding:8px 12px; font-weight:bold; border-radius:2px; text-align:center; min-width:40px; }
+  .c-box.hl { background: var(--amber); }
 
   .view{display:none;}
   .view.active{display:block;}
@@ -211,11 +252,6 @@
   }
   footer .credit{color:var(--muted); letter-spacing:0.5px;}
   footer .credit b{color:var(--cyan); font-weight:600;}
-
-  @media (max-width:600px){
-    h1{font-size:26px;}
-    .toolbar .title{width:100%; order:-1;}
-  }
 </style>
 </head>
 <body>
@@ -229,7 +265,6 @@
 </header>
 
 <main>
-
   <!-- ============ VIEW 1: SELECT ============ -->
   <section id="view-select" class="view active">
     <div class="intro">
@@ -237,7 +272,7 @@
       <h1>Pick an algorithm. Watch it think.</h1>
       <p>Every bar is a value in memory. Amber = comparing, cyan = writing, mint = sorted. Pick one below to visualize it step by step, or run every algorithm at once and see who actually finishes first.</p>
       <div class="compare-cta">
-        <div class="txt"><b>Compare All mode</b> — every algorithm sorts the same array simultaneously. Real computed time, not animation time. (Bogo Sort is excluded — it would never finish.)</div>
+        <div class="txt"><b>Compare All mode</b> — every algorithm sorts the same array simultaneously. Real computed time, not animation time.</div>
         <button class="btn cyan" id="cta-compare">Run all 17 →</button>
       </div>
     </div>
@@ -261,21 +296,13 @@
       <span class="back" id="viz-back">← back</span>
       <div class="title" id="viz-title">—<span class="tag" id="viz-tag"></span></div>
       <div class="field">size
-        <select id="viz-size">
-          <option value="8">8</option>
-          <option value="16" selected>16</option>
-          <option value="32">32</option>
-          <option value="64">64</option>
-          <option value="128">128</option>
-          <option value="256">256</option>
-          <option value="500">500</option>
-          <option value="1000">1000</option>
-        </select>
+        <input type="number" id="viz-size" min="8" max="7000" value="16" style="width:70px;">
       </div>
       <div class="field">speed
         <input type="range" id="viz-speed" min="1" max="100" value="60">
       </div>
       <button class="btn ghost" id="viz-shuffle">↻ new array</button>
+      <button class="btn ghost" id="viz-code-btn">{ } show algorithm info</button>
       <button class="btn coral" id="viz-end" disabled>⏭ end</button>
       <button class="btn" id="viz-sort">▶ sort</button>
     </div>
@@ -288,6 +315,9 @@
         <span><i class="dot" style="background:var(--cyan)"></i>writing</span>
         <span><i class="dot" style="background:var(--mint)"></i>sorted</span>
         <span class="statuspill" id="viz-status">idle</span>
+      </div>
+      <div id="step-log" class="step-log">
+        <div style="color:var(--muted2);">Waiting to start... (Step-by-step logs apply for arrays ≤ 100 elements)</div>
       </div>
     </div>
 
@@ -305,26 +335,63 @@
   <!-- ============ VIEW 3: COMPARE ALL ============ -->
   <section id="view-cmp" class="view">
     <div class="cmp-top">
-      <div class="title">Compare all 17 algorithms</div>
-      <div class="field">size
-        <select id="cmp-size">
-          <option value="16">16</option>
-          <option value="32" selected>32</option>
-          <option value="64">64</option>
-          <option value="128">128</option>
-          <option value="256">256</option>
-          <option value="500">500</option>
-          <option value="1000">1000</option>
+      <div class="title">Leaderboard</div>
+      <div class="field" style="margin-left:auto; margin-right: 12px;">sort by
+        <select id="cmp-sort-select">
+          <option value="standard">Standard Order</option>
+          <option value="best">Best Case</option>
+          <option value="worst">Worst Case</option>
+          <option value="space">Space Complexity</option>
+          <option value="comparisons" id="cmp-opt-comps" disabled>Comparisons (Run first)</option>
+          <option value="fastest" id="cmp-opt-fastest" disabled>Fastest Time (Run first)</option>
         </select>
       </div>
+      <div class="field">size
+        <input type="number" id="cmp-size" min="8" max="7000" value="1000" style="width:80px;">
+      </div>
       <button class="btn ghost" id="cmp-shuffle">↻ new array</button>
-      <button class="btn mint" id="cmp-play">▶ play all</button>
-      <div class="note">Bogo Sort is excluded from Compare All — it isn't guaranteed to ever finish.</div>
+      <button class="btn coral" id="cmp-end" disabled>⏭ End Benchmark</button>
+      <button class="btn mint" id="cmp-play">▶ run benchmark</button>
+      <div class="note">Use the dropdown to sort algorithms by complexity, comparisons, or execution speed.</div>
     </div>
     <div class="cmpgrid" id="cmpgrid"></div>
   </section>
-
 </main>
+
+<!-- CODE / CONCEPT VIEWER MODAL -->
+<div id="code-modal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2 id="code-modal-title">Algorithm Details</h2>
+      <span class="close-modal" id="close-code-modal">&times;</span>
+    </div>
+    <div class="modal-body">
+      <div class="lang-tabs">
+        <button class="lang-btn active" data-lang="concept">Concept & Explanation</button>
+        <button class="lang-btn" data-lang="go">Go</button>
+        <button class="lang-btn" data-lang="python">Python</button>
+        <button class="lang-btn" data-lang="java">Java</button>
+        <button class="lang-btn" data-lang="c">C</button>
+      </div>
+
+      <!-- CONCEPT TAB -->
+      <div id="concept-wrapper" class="concept-wrapper active">
+        <!-- Injected via JS -->
+      </div>
+
+      <!-- CODE TABS -->
+      <div id="code-wrapper" class="code-wrapper">
+        <div class="field" style="margin-bottom:16px;">
+          Test Set (15 elements):
+          <input type="text" id="code-input-arr" value="64, 34, 25, 12, 22, 11, 90, 88, 45, 50, 13, 76, 39, 5, 60" style="width:100%;">
+        </div>
+        <button class="btn cyan copy-btn" id="copy-code-btn">Copy Code</button>
+        <pre><code id="code-block"></code></pre>
+      </div>
+
+    </div>
+  </div>
+</div>
 
 <footer>
   <span>sortviz — bubble to bitonic, rendered on &lt;canvas&gt;, zero dependencies.</span>
@@ -333,41 +400,39 @@
 
 <script>
 /* ============================================================
-   ALGORITHM METADATA
+   ALGORITHM METADATA & SORTING WEIGHTS
+   stdIdx mimics the exact categorical order layout from screenshots.
+   Weights: O(1)=1, O(log n)=2, O(n)=3, O(n log n)=4, O(n²)=5
    ============================================================ */
 const ALGOS = [
-  {key:'bubble', name:'Bubble Sort', cat:'simple', best:'O(n)', avg:'O(n²)', worst:'O(n²)', space:'O(1)'},
-  {key:'selection', name:'Selection Sort', cat:'simple', best:'O(n²)', avg:'O(n²)', worst:'O(n²)', space:'O(1)'},
-  {key:'insertion', name:'Insertion Sort', cat:'simple', best:'O(n)', avg:'O(n²)', worst:'O(n²)', space:'O(1)'},
-  {key:'gnome', name:'Gnome Sort', cat:'simple', best:'O(n)', avg:'O(n²)', worst:'O(n²)', space:'O(1)'},
-  {key:'cocktail', name:'Cocktail Shaker', cat:'simple', best:'O(n)', avg:'O(n²)', worst:'O(n²)', space:'O(1)'},
-  {key:'comb', name:'Comb Sort', cat:'simple', best:'O(n log n)', avg:'O(n²/2ᵖ)', worst:'O(n²)', space:'O(1)'},
+  {key:'bubble', name:'Bubble Sort', cat:'simple', best:'O(n)', avg:'O(n²)', worst:'O(n²)', space:'O(1)', stdIdx:0, wBest:3, wWorst:5, wSpace:1},
+  {key:'selection', name:'Selection Sort', cat:'simple', best:'O(n²)', avg:'O(n²)', worst:'O(n²)', space:'O(1)', stdIdx:1, wBest:5, wWorst:5, wSpace:1},
+  {key:'insertion', name:'Insertion Sort', cat:'simple', best:'O(n)', avg:'O(n²)', worst:'O(n²)', space:'O(1)', stdIdx:2, wBest:3, wWorst:5, wSpace:1},
+  {key:'gnome', name:'Gnome Sort', cat:'simple', best:'O(n)', avg:'O(n²)', worst:'O(n²)', space:'O(1)', stdIdx:3, wBest:3, wWorst:5, wSpace:1},
+  {key:'cocktail', name:'Cocktail Shaker', cat:'simple', best:'O(n)', avg:'O(n²)', worst:'O(n²)', space:'O(1)', stdIdx:4, wBest:3, wWorst:5, wSpace:1},
+  {key:'comb', name:'Comb Sort', cat:'simple', best:'O(n log n)', avg:'O(n²/2ᵖ)', worst:'O(n²)', space:'O(1)', stdIdx:5, wBest:4, wWorst:5, wSpace:1},
+  
+  {key:'shell', name:'Shell Sort', cat:'efficient', best:'O(n log n)', avg:'O(n^1.3)', worst:'O(n²)', space:'O(1)', stdIdx:6, wBest:4, wWorst:5, wSpace:1},
+  {key:'merge', name:'Merge Sort', cat:'efficient', best:'O(n log n)', avg:'O(n log n)', worst:'O(n log n)', space:'O(n)', stdIdx:7, wBest:4, wWorst:4, wSpace:3},
+  {key:'quick', name:'Quick Sort', cat:'efficient', best:'O(n log n)', avg:'O(n log n)', worst:'O(n²)', space:'O(log n)', stdIdx:8, wBest:4, wWorst:5, wSpace:2},
+  {key:'heap', name:'Heap Sort', cat:'efficient', best:'O(n log n)', avg:'O(n log n)', worst:'O(n log n)', space:'O(1)', stdIdx:9, wBest:4, wWorst:4, wSpace:1},
+  {key:'tree', name:'Tree Sort', cat:'efficient', best:'O(n log n)', avg:'O(n log n)', worst:'O(n²)', space:'O(n)', stdIdx:10, wBest:4, wWorst:5, wSpace:3},
+  {key:'bitonic', name:'Bitonic Sort', cat:'efficient', best:'O(n log²n)', avg:'O(n log²n)', worst:'O(n log²n)', space:'O(n log n)', stdIdx:11, wBest:4.1, wWorst:4.1, wSpace:4},
+  {key:'cycle', name:'Cycle Sort', cat:'efficient', best:'O(n²)', avg:'O(n²)', worst:'O(n²)', space:'O(1)', stdIdx:12, wBest:5, wWorst:5, wSpace:1},
 
-  {key:'shell', name:'Shell Sort', cat:'efficient', best:'O(n log n)', avg:'O(n^1.3)', worst:'O(n²)', space:'O(1)'},
-  {key:'merge', name:'Merge Sort', cat:'efficient', best:'O(n log n)', avg:'O(n log n)', worst:'O(n log n)', space:'O(n)'},
-  {key:'quick', name:'Quick Sort', cat:'efficient', best:'O(n log n)', avg:'O(n log n)', worst:'O(n²)', space:'O(log n)'},
-  {key:'heap', name:'Heap Sort', cat:'efficient', best:'O(n log n)', avg:'O(n log n)', worst:'O(n log n)', space:'O(1)'},
-  {key:'tree', name:'Tree Sort', cat:'efficient', best:'O(n log n)', avg:'O(n log n)', worst:'O(n²)', space:'O(n)'},
-  {key:'cycle', name:'Cycle Sort', cat:'efficient', best:'O(n²)', avg:'O(n²)', worst:'O(n²)', space:'O(1)'},
-  {key:'bitonic', name:'Bitonic Sort', cat:'efficient', best:'O(n log²n)', avg:'O(n log²n)', worst:'O(n log²n)', space:'O(n log n)'},
+  {key:'counting', name:'Counting Sort', cat:'linear', best:'O(n+k)', avg:'O(n+k)', worst:'O(n+k)', space:'O(n+k)', stdIdx:13, wBest:3, wWorst:3, wSpace:3},
+  {key:'radix', name:'Radix Sort', cat:'linear', best:'O(nk)', avg:'O(nk)', worst:'O(nk)', space:'O(n+k)', stdIdx:14, wBest:3.5, wWorst:3.5, wSpace:3},
+  {key:'bucket', name:'Bucket Sort', cat:'linear', best:'O(n+k)', avg:'O(n+k)', worst:'O(n²)', space:'O(n)', stdIdx:15, wBest:3, wWorst:5, wSpace:3},
+  {key:'pigeonhole', name:'Pigeonhole Sort', cat:'linear', best:'O(n+range)', avg:'O(n+range)', worst:'O(n+range)', space:'O(range)', stdIdx:16, wBest:3, wWorst:3, wSpace:3},
 
-  {key:'counting', name:'Counting Sort', cat:'linear', best:'O(n+k)', avg:'O(n+k)', worst:'O(n+k)', space:'O(n+k)'},
-  {key:'radix', name:'Radix Sort', cat:'linear', best:'O(nk)', avg:'O(nk)', worst:'O(nk)', space:'O(n+k)'},
-  {key:'bucket', name:'Bucket Sort', cat:'linear', best:'O(n+k)', avg:'O(n+k)', worst:'O(n²)', space:'O(n)'},
-  {key:'pigeonhole', name:'Pigeonhole Sort', cat:'linear', best:'O(n+range)', avg:'O(n+range)', worst:'O(n+range)', space:'O(range)'},
-
-  {key:'bogo', name:'Bogo Sort', cat:'meme', best:'O(n)', avg:'O(n·n!)', worst:'O(∞)', space:'O(1)'},
+  {key:'bogo', name:'Bogo Sort', cat:'meme', best:'O(n)', avg:'O(n·n!)', worst:'O(∞)', space:'O(1)', stdIdx:99, wBest:3, wWorst:9, wSpace:1},
 ];
 const CATMAP = {simple:'grid-simple', efficient:'grid-efficient', linear:'grid-linear', meme:'grid-meme'};
 const BYKEY = Object.fromEntries(ALGOS.map(a=>[a.key,a]));
-const COMPARE_ALGOS = ALGOS.filter(a=>a.key!=='bogo');
+const COMPARE_ALGOS = ALGOS.filter(a=>a.key!=='bogo'); // Standard layout ordering
 
 /* ============================================================
-   SORT GENERATORS
-   diff-based steps: {active:[indices], type:'compare'|'write'|'done', vals:[...]}
-   'vals' (only present on 'write') are the NEW values at the matching 'active' indices.
-   bogo sort is the one exception — it yields a full array snapshot via 'arr'
-   because a full shuffle touches every index at once.
+   SORT GENERATORS (For visualization)
    ============================================================ */
 const GEN = {};
 
@@ -571,7 +636,6 @@ GEN.cycle = function*(a){
 };
 
 GEN.bitonic = function*(a){
-  // requires power-of-2 length; caller guarantees this
   let n=a.length;
   function* cs(i,j,dir){
     yield {active:[i,j], type:'compare'};
@@ -657,7 +721,6 @@ GEN.pigeonhole = function*(a){
   yield {active:[], type:'done'};
 };
 
-// bogo sort: full shuffle every attempt, so it yields a full snapshot instead of a diff.
 GEN.bogo = function*(a, cap=4000){
   function isSorted(){for(let i=1;i<a.length;i++) if(a[i-1]>a[i]) return false; return true;}
   function shuffle(){for(let i=a.length-1;i>0;i--){let j=(Math.random()*(i+1))|0; [a[i],a[j]]=[a[j],a[i]];}}
@@ -668,7 +731,7 @@ GEN.bogo = function*(a, cap=4000){
 };
 
 /* ============================================================
-   HELPERS
+   HELPERS & TRACING
    ============================================================ */
 function randomArray(n){
   const vals=[];
@@ -677,8 +740,6 @@ function randomArray(n){
 }
 function nextPow2(n){let p=1; while(p<n) p*=2; return p;}
 
-// drains a generator fully, measuring real compute time + counting steps.
-// returns compact trace (no full-array copies except bogo) plus the final sorted array.
 function buildTrace(key, arr){
   const work = arr.slice();
   const gen = key==='bogo' ? GEN.bogo(work, 4000) : GEN[key](work);
@@ -750,7 +811,7 @@ function getCss(varName){
 }
 
 /* ============================================================
-   VIEW: SELECT
+   VIEW ROUTING
    ============================================================ */
 function renderGrids(){
   const containers = {simple:[],efficient:[],linear:[],meme:[]};
@@ -774,9 +835,6 @@ function renderGrids(){
   });
 }
 
-/* ============================================================
-   VIEW: NAV / ROUTING
-   ============================================================ */
 function showView(id){
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
   document.getElementById(id).classList.add('active');
@@ -789,9 +847,9 @@ document.getElementById('cta-compare').addEventListener('click', ()=>{ if(!cmpIn
 document.getElementById('viz-back').addEventListener('click', ()=>showView('view-select'));
 
 /* ============================================================
-   VIEW: SINGLE VISUALIZER
+   VIEW: SINGLE VISUALIZER + STEP LOGS
    ============================================================ */
-const MAX_FRAMES = 1500; // cap animation frames regardless of array size
+const MAX_FRAMES = 1500;
 const vizState = { key:null, arr:[], mirror:[], timer:null, state:'idle', finalArr:null };
 
 function openViz(key){
@@ -808,6 +866,7 @@ function openViz(key){
 
 function currentVizSize(){
   let n = parseInt(document.getElementById('viz-size').value,10);
+  if(n>7000) n=7000;
   if(vizState.key==='bitonic') n = nextPow2(n);
   return n;
 }
@@ -816,6 +875,20 @@ function setVizStatus(text, cls){
   const el = document.getElementById('viz-status');
   el.textContent = text;
   el.className = 'statuspill' + (cls ? ' '+cls : '');
+}
+
+function clearLog(){
+  const log = document.getElementById('step-log');
+  log.innerHTML = '';
+}
+
+function appendLog(msg, cls){
+  const log = document.getElementById('step-log');
+  const d = document.createElement('div');
+  d.className = cls || '';
+  d.textContent = msg;
+  log.appendChild(d);
+  log.scrollTop = log.scrollHeight;
 }
 
 function newVizArray(){
@@ -831,6 +904,11 @@ function newVizArray(){
   document.getElementById('viz-sort').textContent = '▶ sort';
   document.getElementById('viz-end').disabled = true;
   setVizStatus('idle');
+  
+  clearLog();
+  if(vizState.arr.length > 100) appendLog("Array size > 100. Step logs disabled to prevent browser lag.");
+  else appendLog("Ready. Click sort to begin algorithm execution logs.");
+  
   const canvas = document.getElementById('viz-canvas');
   drawBars(canvas, vizState.mirror, [], null, 100, false);
 }
@@ -843,7 +921,7 @@ function finishVizSort(){
   stopVizPlayback();
   vizState.state = 'done';
   vizState.mirror = vizState.finalArr.slice();
-  vizState.arr = vizState.finalArr.slice(); // persist sorted state until "new array"
+  vizState.arr = vizState.finalArr.slice();
   const canvas = document.getElementById('viz-canvas');
   const maxVal = Math.max(...vizState.mirror, 100);
   drawBars(canvas, vizState.mirror, [], null, maxVal, true);
@@ -851,6 +929,7 @@ function finishVizSort(){
   document.getElementById('viz-sort').textContent = '✓ sorted';
   document.getElementById('viz-end').disabled = true;
   setVizStatus('done', 'done');
+  if(vizState.arr.length <= 100) appendLog("➔ Sorting Complete!", "log-done");
 }
 
 document.getElementById('viz-size').addEventListener('change', newVizArray);
@@ -874,14 +953,16 @@ document.getElementById('viz-sort').addEventListener('click', ()=>{
   document.getElementById('viz-sort').disabled = true;
   document.getElementById('viz-end').disabled = false;
   setVizStatus('playing…', 'playing');
+  clearLog();
 
   const canvas = document.getElementById('viz-canvas');
   const speedSlider = document.getElementById('viz-speed');
   const maxVal = Math.max(...vizState.arr, ...finalArr, 100);
-  const mirror = vizState.mirror; // mutate in place, no per-step copies
+  const mirror = vizState.mirror;
 
   const stepsPerTick = Math.max(1, Math.ceil(trace.length / MAX_FRAMES));
   let idx = 0;
+  const showLogs = vizState.arr.length <= 100;
 
   function tick(){
     if(idx>=trace.length){
@@ -894,6 +975,11 @@ document.getElementById('viz-sort').addEventListener('click', ()=>{
       const step = trace[idx];
       applyStep(mirror, step);
       lastStep = step;
+      
+      if(showLogs){
+        if(step.type === 'compare') appendLog(`[Compare] Checking elements at indices [${step.active.join(', ')}]`, "log-cmp");
+        else if(step.type === 'write' && step.vals) appendLog(`[Write] Updating indices [${step.active.join(', ')}] with value(s) [${step.vals.join(', ')}]`, "log-wr");
+      }
     }
     const isDone = lastStep.type==='done';
     drawBars(canvas, mirror, lastStep.active, lastStep.type, maxVal, isDone);
@@ -904,36 +990,106 @@ document.getElementById('viz-sort').addEventListener('click', ()=>{
 });
 
 /* ============================================================
-   VIEW: COMPARE ALL  (bogo sort excluded)
+   VIEW: COMPARE ALL & DYNAMIC DROPDOWN SORTING
    ============================================================ */
 let cmpBase = null;
 let cmpPlayers = [];
 let cmpPlaying = false;
 let cmpInited = false;
-const CMP_MAX_FRAMES = 800;
+let benchmarkResults = [];
+
+function getSortedKeys(mode) {
+  if (mode === 'best') return COMPARE_ALGOS.slice().sort((a,b) => a.wBest - b.wBest || a.stdIdx - b.stdIdx).map(a => a.key);
+  if (mode === 'worst') return COMPARE_ALGOS.slice().sort((a,b) => a.wWorst - b.wWorst || a.stdIdx - b.stdIdx).map(a => a.key);
+  if (mode === 'space') return COMPARE_ALGOS.slice().sort((a,b) => a.wSpace - b.wSpace || a.stdIdx - b.stdIdx).map(a => a.key);
+  if (mode === 'fastest') return benchmarkResults.slice().sort((a,b) => a.timeMs - b.timeMs || a.comparisons - b.comparisons).map(r => r.a.key);
+  if (mode === 'comparisons') return benchmarkResults.slice().sort((a,b) => a.comparisons - b.comparisons || a.timeMs - b.timeMs).map(r => r.a.key);
+  
+  // 'standard' (Default from screenshot images)
+  return COMPARE_ALGOS.slice().sort((a,b) => a.stdIdx - b.stdIdx).map(a => a.key);
+}
 
 function initCompare(){
   cmpInited = true;
+  const initialMode = document.getElementById('cmp-sort-select').value;
+  buildCmpGrid(getSortedKeys(initialMode)); 
+  newCompareArray();
+}
+
+function buildCmpGrid(sortedKeys){
   const grid = document.getElementById('cmpgrid');
-  grid.innerHTML = COMPARE_ALGOS.map(a=>`
+  grid.innerHTML = sortedKeys.map(k=>{
+    const a = BYKEY[k];
+    return `
     <div class="cmpcard" id="cmpcard-${a.key}">
       <div class="h"><span class="nm">${a.name}</span><span class="rank" id="rank-${a.key}"></span></div>
       <canvas id="cv-${a.key}"></canvas>
       <div class="foot"><span class="mono">${a.worst}</span><span class="t" id="time-${a.key}">ready</span></div>
-    </div>
-  `).join('');
-  newCompareArray();
+    </div>`
+  }).join('');
 }
+
+function animateReorder(newOrderKeys) {
+  const grid = document.getElementById('cmpgrid');
+  const elements = {};
+  
+  Array.from(grid.children).forEach(child => {
+    elements[child.id] = { rect: child.getBoundingClientRect(), el: child };
+  });
+
+  newOrderKeys.forEach(k => grid.appendChild(elements['cmpcard-'+k].el));
+
+  Array.from(grid.children).forEach(child => {
+    const first = elements[child.id].rect;
+    const last = child.getBoundingClientRect();
+    const dx = first.left - last.left;
+    const dy = first.top - last.top;
+
+    if (dx !== 0 || dy !== 0) {
+      child.style.transition = 'none';
+      child.style.transform = `translate(${dx}px, ${dy}px)`;
+      
+      requestAnimationFrame(() => {
+        child.style.transition = 'transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)';
+        child.style.transform = '';
+      });
+    }
+  });
+}
+
+document.getElementById('cmp-sort-select').addEventListener('change', (e) => {
+  animateReorder(getSortedKeys(e.target.value));
+});
 
 function newCompareArray(){
   cmpPlayers.forEach(p=>clearInterval(p.timer));
   cmpPlayers = [];
+  benchmarkResults = [];
   cmpPlaying = false;
-  document.getElementById('cmp-play').disabled = false;
-  document.getElementById('cmp-play').textContent = '▶ play all';
+  
+  const playBtn = document.getElementById('cmp-play');
+  const endBtn = document.getElementById('cmp-end');
+  const sortSelect = document.getElementById('cmp-sort-select');
+  const optFastest = document.getElementById('cmp-opt-fastest');
+  const optComps = document.getElementById('cmp-opt-comps');
+
+  playBtn.disabled = false;
+  endBtn.disabled = true;
+  optFastest.disabled = true;
+  optComps.disabled = true;
+  playBtn.textContent = '▶ run benchmark';
+  
+  // If we are currently sorting by benchmark metrics, fallback to standard since we lost data
+  if (sortSelect.value === 'fastest' || sortSelect.value === 'comparisons') {
+    sortSelect.value = 'standard';
+  }
+  
   const n = parseInt(document.getElementById('cmp-size').value,10);
-  cmpBase = randomArray(n);
+  cmpBase = randomArray(Math.min(n, 7000));
   const maxVal = Math.max(...cmpBase, 100);
+  
+  buildCmpGrid(getSortedKeys(sortSelect.value));
+  
   COMPARE_ALGOS.forEach(a=>{
     const size = a.key==='bitonic' ? nextPow2(n) : n;
     const seedArr = a.key==='bitonic' ? randomArray(size) : cmpBase;
@@ -953,25 +1109,63 @@ document.getElementById('cmp-play').addEventListener('click', ()=>{
   if(cmpPlaying) return;
   cmpPlaying = true;
   const playBtn = document.getElementById('cmp-play');
+  const endBtn = document.getElementById('cmp-end');
+  
   playBtn.disabled = true;
+  endBtn.disabled = false;
   playBtn.textContent = 'computing…';
+  setTimeout(runCompareAll, 20);
+});
 
-  // defer the heavy synchronous work one tick so the disabled/computing state paints first
-  setTimeout(runCompareAll, 10);
+document.getElementById('cmp-end').addEventListener('click', () => {
+  if(!cmpPlaying) return;
+  cmpPlayers.forEach(p => p.forceFinish());
 });
 
 function runCompareAll(){
   const playBtn = document.getElementById('cmp-play');
+  const endBtn = document.getElementById('cmp-end');
+  const sortSelect = document.getElementById('cmp-sort-select');
+  const optFastest = document.getElementById('cmp-opt-fastest');
+  const optComps = document.getElementById('cmp-opt-comps');
+  
   playBtn.textContent = '▶ playing…';
+  
   const n = parseInt(document.getElementById('cmp-size').value,10);
   const globalMax = Math.max(...cmpBase, 100);
-  let finishedCount = 0;
-  const total = COMPARE_ALGOS.length;
-
-  COMPARE_ALGOS.forEach(a=>{
+  
+  benchmarkResults = COMPARE_ALGOS.map(a => {
     const size = a.key==='bitonic' ? nextPow2(n) : n;
     const seedArr = a.key==='bitonic' ? randomArray(size) : cmpBase;
-    const {trace, timeMs, comparisons, finalArr} = buildTrace(a.key, seedArr);
+    const res = buildTrace(a.key, seedArr);
+    return { a, seedArr, ...res };
+  });
+
+  // Calculate ranks strictly by execution time
+  let sortedByTime = benchmarkResults.slice().sort((a,b) => a.timeMs - b.timeMs);
+  const rankMap = {};
+  sortedByTime.forEach((res, i) => rankMap[res.a.key] = i + 1);
+
+  let finishedCount = 0;
+  const total = benchmarkResults.length;
+
+  const onComplete = () => {
+    if(finishedCount === total){
+      playBtn.disabled = false;
+      endBtn.disabled = true;
+      optFastest.disabled = false;
+      optComps.disabled = false;
+      playBtn.textContent = '▶ re-run benchmark';
+      cmpPlaying = false;
+      
+      // Auto-select fastest and reorder grid
+      sortSelect.value = 'fastest';
+      setTimeout(() => animateReorder(getSortedKeys('fastest')), 600);
+    }
+  };
+
+  benchmarkResults.forEach(res => {
+    const {a, trace, timeMs, comparisons, finalArr, seedArr} = res;
     const canvas = document.getElementById('cv-'+a.key);
     const timeEl = document.getElementById('time-'+a.key);
     const cardEl = document.getElementById('cmpcard-'+a.key);
@@ -980,31 +1174,446 @@ function runCompareAll(){
 
     const mirror = seedArr.slice();
     const maxVal = a.key==='bitonic' ? Math.max(...seedArr,100) : globalMax;
-    const stepsPerTick = Math.max(1, Math.ceil(trace.length / CMP_MAX_FRAMES));
+    const stepsPerTick = Math.max(1, Math.ceil(trace.length / 800));
     let idx=0;
-    const msPerStep = 6;
+    
+    const resolveFinish = () => {
+      drawBars(canvas, finalArr, [], null, maxVal, true);
+      timeEl.textContent = fmtTime(timeMs) + ' · ' + comparisons.toLocaleString() + ' cmp';
+      cardEl.classList.add('done');
+      rankEl.textContent = '#' + rankMap[a.key];
+      finishedCount++;
+      onComplete();
+    };
+
     const timer = setInterval(()=>{
       if(idx>=trace.length){
         clearInterval(timer);
-        drawBars(canvas, finalArr, [], null, maxVal, true);
-        timeEl.textContent = fmtTime(timeMs) + ' · ' + comparisons.toLocaleString() + ' cmp';
-        cardEl.classList.add('done');
-        finishedCount++;
-        rankEl.textContent = '#'+finishedCount;
-        if(finishedCount===total){
-          playBtn.disabled = false;
-          playBtn.textContent = '▶ play all';
-          cmpPlaying = false;
-        }
+        resolveFinish();
         return;
       }
       let lastStep=null;
       const batchEnd = Math.min(trace.length, idx+stepsPerTick);
       for(; idx<batchEnd; idx++){ const step=trace[idx]; applyStep(mirror, step); lastStep=step; }
       drawBars(canvas, mirror, lastStep.active, lastStep.type, maxVal, lastStep.type==='done');
-    }, msPerStep);
-    cmpPlayers.push({key:a.key, timer});
+    }, 6);
+
+    cmpPlayers.push({
+      key:a.key, 
+      timer, 
+      forceFinish: () => {
+        if (cardEl.classList.contains('done')) return;
+        clearInterval(timer);
+        idx = trace.length; 
+        resolveFinish();
+      }
+    });
   });
+}
+
+/* ============================================================
+   CODE / CONCEPT MODAL ENGINE (EXTENDED WITH FULL CODE)
+   ============================================================ */
+const modal = document.getElementById('code-modal');
+const closeBtn = document.getElementById('close-code-modal');
+const codeBtn = document.getElementById('viz-code-btn');
+const copyBtn = document.getElementById('copy-code-btn');
+const langBtns = document.querySelectorAll('.lang-btn');
+const arrInput = document.getElementById('code-input-arr');
+const conceptWrapper = document.getElementById('concept-wrapper');
+const codeWrapper = document.getElementById('code-wrapper');
+
+let currentLang = 'concept'; 
+
+codeBtn.addEventListener('click', () => {
+    document.getElementById('code-modal-title').textContent = (BYKEY[vizState.key]?.name || 'Algorithm') + ' Details';
+    modal.classList.add('active');
+    renderContent();
+});
+closeBtn.addEventListener('click', () => modal.classList.remove('active'));
+window.addEventListener('click', (e) => { if(e.target===modal) modal.classList.remove('active'); });
+arrInput.addEventListener('input', renderContent);
+
+langBtns.forEach(b => b.addEventListener('click', (e) => {
+    langBtns.forEach(btn => btn.classList.remove('active'));
+    e.target.classList.add('active');
+    currentLang = e.target.dataset.lang;
+    
+    if (currentLang === 'concept') {
+        conceptWrapper.classList.add('active');
+        codeWrapper.classList.remove('active');
+    } else {
+        conceptWrapper.classList.remove('active');
+        codeWrapper.classList.add('active');
+    }
+    renderContent();
+}));
+
+copyBtn.addEventListener('click', () => {
+    const txt = document.getElementById('code-block').innerText;
+    navigator.clipboard.writeText(txt);
+    copyBtn.textContent = 'Copied!';
+    setTimeout(() => copyBtn.textContent = 'Copy Code', 2000);
+});
+
+// FULL CONCEPT EXPLANATIONS
+const CONCEPTS = {
+  radix: `
+      <div class="concept-title">Radix Sort - Conceptual Logic</div>
+      <p>Radix sort is a non-comparative integer sorting algorithm. It sorts data with integer keys by grouping keys by the individual digits which share the same significant position and value. It processes each digit from the least significant digit (LSD) to the most significant digit (MSD).</p>
+      <ul style="margin-left: 20px; margin-top: 10px;">
+        <li><strong>Step 1:</strong> Find the maximum element in the array to determine the number of digits required (e.g., 802 has 3 digits, so the algorithm will run 3 times).</li>
+        <li><strong>Step 2 (Unit Digit):</strong> Isolate the 1s place digit for every number. Place elements into 10 buckets (0-9) based purely on that digit.</li>
+        <li><strong>Step 3 (Tens Digit):</strong> Using the new order from Step 2, isolate the 10s place digit. Place elements into buckets (0-9). If a number has no tens digit (like 2), treat it as 0.</li>
+        <li><strong>Step 4 (Hundreds Digit):</strong> Repeat the binning process for the 100s place digit.</li>
+        <li><strong>Step 5:</strong> After the most significant digit has been sorted, the entire array is fully sorted.</li>
+      </ul>
+  `,
+  bubble: `
+      <div class="concept-title">Bubble Sort - Conceptual Logic</div>
+      <p>Bubble Sort is the simplest sorting algorithm that works by repeatedly swapping adjacent elements if they are in the wrong order. It is named because larger elements "bubble" up to the top of the array.</p>
+      <ul style="margin-left: 20px; margin-top: 10px;">
+        <li><strong>Step 1:</strong> Start at the first element (index 0). Compare it with the next element (index 1).</li>
+        <li><strong>Step 2:</strong> If the first element is strictly greater than the second element, swap their positions.</li>
+        <li><strong>Step 3:</strong> Move to the next adjacent pair (index 1 and index 2) and repeat the comparison and swap logic.</li>
+        <li><strong>Step 4:</strong> Continue this until the end of the array is reached. At this point, the absolute largest element is guaranteed to be at the very end of the array.</li>
+        <li><strong>Step 5:</strong> Repeat Steps 1-4 for the remaining unsorted portion of the array (ignoring the last element, then the last two, etc.) until a full pass is completed where 0 swaps occur.</li>
+      </ul>
+  `,
+  selection: `
+      <div class="concept-title">Selection Sort - Conceptual Logic</div>
+      <p>Selection sort divides the input list into two parts: a sorted sublist built up from left to right at the front of the list, and a sublist of the remaining unsorted items that occupy the rest of the list.</p>
+      <ul style="margin-left: 20px; margin-top: 10px;">
+        <li><strong>Step 1:</strong> Start with the entire array considered as the "unsorted" sublist. Initialize a marker for the boundary between the sorted and unsorted parts at index 0.</li>
+        <li><strong>Step 2:</strong> Scan the entire unsorted sublist to find the absolute minimum value.</li>
+        <li><strong>Step 3:</strong> Swap this minimum value with the first element of the unsorted sublist.</li>
+        <li><strong>Step 4:</strong> Move the sorted boundary one element to the right (since that index now holds the correct, sorted minimum element).</li>
+        <li><strong>Step 5:</strong> Repeat steps 2-4 until the unsorted boundary reaches the end of the array.</li>
+      </ul>
+  `,
+  insertion: `
+      <div class="concept-title">Insertion Sort - Conceptual Logic</div>
+      <p>Insertion sort builds the final sorted array one item at a time. It behaves similarly to how you might sort a hand of playing cards: taking one card at a time and inserting it into its correct position relative to the cards you are already holding.</p>
+      <ul style="margin-left: 20px; margin-top: 10px;">
+        <li><strong>Step 1:</strong> Assume the first element (index 0) is already sorted. Move to the next element (index 1) and designate it as the "key".</li>
+        <li><strong>Step 2:</strong> Compare the key to the elements in the sorted sublist to its left, reading from right to left.</li>
+        <li><strong>Step 3:</strong> If an element in the sorted sublist is larger than the key, shift that element one position to the right to make room.</li>
+        <li><strong>Step 4:</strong> Once you find an element smaller than the key (or reach the start of the array), insert the key into the open space.</li>
+        <li><strong>Step 5:</strong> Move to the next unsorted element and repeat the process until the end of the array is reached.</li>
+      </ul>
+  `,
+  gnome: `
+      <div class="concept-title">Gnome Sort - Conceptual Logic</div>
+      <p>Gnome sort (also known as Stupid sort) is based on the technique used by the standard Dutch Garden Gnome. He looks at the flower pot next to him and the previous one; if they are in the right order he steps one pot forward, otherwise, he swaps them and steps one pot backward.</p>
+      <ul style="margin-left: 20px; margin-top: 10px;">
+        <li><strong>Step 1:</strong> Start at the beginning of the array (index 0). If you are at the start, take a step forward to index 1.</li>
+        <li><strong>Step 2:</strong> Compare the current element with the element immediately before it.</li>
+        <li><strong>Step 3:</strong> If they are in the correct order (current >= previous), take one step forward (index++).</li>
+        <li><strong>Step 4:</strong> If they are in the wrong order, swap the two elements and take one step backward (index--).</li>
+        <li><strong>Step 5:</strong> Repeat this process until you reach the end of the array. The algorithm effectively drags elements backward until they hit their correct sorted spot, then walks forward again.</li>
+      </ul>
+  `,
+  cocktail: `
+      <div class="concept-title">Cocktail Shaker Sort - Conceptual Logic</div>
+      <p>Cocktail Shaker Sort is a variation of Bubble Sort that operates in two directions. Instead of only bubbling the largest items to the end, it then turns around and bubbles the smallest items back to the beginning, reducing "turtle" values (small values at the end of the array).</p>
+      <ul style="margin-left: 20px; margin-top: 10px;">
+        <li><strong>Step 1:</strong> Loop from left to right, comparing adjacent elements and swapping them if they are out of order, exactly like a standard Bubble Sort.</li>
+        <li><strong>Step 2:</strong> The largest element is now at the far right. Decrease the upper bound boundary.</li>
+        <li><strong>Step 3:</strong> If no swaps occurred in Step 1, the array is sorted. Exit.</li>
+        <li><strong>Step 4:</strong> Turn around and loop from right to left, starting from the new upper bound down to the lower bound. Compare adjacent elements and swap if out of order.</li>
+        <li><strong>Step 5:</strong> The smallest element is now at the far left. Increase the lower bound boundary.</li>
+        <li><strong>Step 6:</strong> Repeat the left-to-right and right-to-left passes until the two boundaries meet.</li>
+      </ul>
+  `,
+  comb: `
+      <div class="concept-title">Comb Sort - Conceptual Logic</div>
+      <p>Comb Sort improves on Bubble Sort by eliminating small values near the end of the list ("turtles"), which slow Bubble Sort down massively. It does this by comparing elements separated by a gap larger than 1.</p>
+      <ul style="margin-left: 20px; margin-top: 10px;">
+        <li><strong>Step 1:</strong> Initialize the 'gap' to the length of the array.</li>
+        <li><strong>Step 2:</strong> Divide the gap by a shrink factor (the ideal shrink factor is mathematically evaluated to be roughly 1.3).</li>
+        <li><strong>Step 3:</strong> Iterate through the array. Compare elements that are exactly 'gap' distance apart (e.g., index 0 and index 'gap', index 1 and index 'gap'+1).</li>
+        <li><strong>Step 4:</strong> If the elements are out of order, swap them.</li>
+        <li><strong>Step 5:</strong> Repeat Steps 2-4, continually shrinking the gap by 1.3, until the gap is 1.</li>
+        <li><strong>Step 6:</strong> When the gap is 1, the algorithm functions exactly like a standard Bubble Sort, but the array is already nearly sorted, making it execute very fast.</li>
+      </ul>
+  `,
+  shell: `
+      <div class="concept-title">Shell Sort - Conceptual Logic</div>
+      <p>Shell Sort is a generalized version of Insertion Sort. It first sorts elements that are far apart from each other and successively reduces the interval between the elements to be sorted.</p>
+      <ul style="margin-left: 20px; margin-top: 10px;">
+        <li><strong>Step 1:</strong> Choose an initial gap sequence (e.g., N/2, then N/4, then N/8, down to 1). Let's say the gap is 4.</li>
+        <li><strong>Step 2:</strong> Treat the array as a set of interleaved sublists (e.g., indices [0,4,8], [1,5,9], etc.).</li>
+        <li><strong>Step 3:</strong> Perform an Insertion Sort on each of these interleaved sublists independently. Because the sublists are small, this is fast.</li>
+        <li><strong>Step 4:</strong> Reduce the gap size according to the sequence (e.g., from 4 down to 2).</li>
+        <li><strong>Step 5:</strong> Perform Insertion Sort on the new, larger interleaved sublists. Elements will not have to move very far because of the previous gap sorting.</li>
+        <li><strong>Step 6:</strong> The final pass uses a gap of 1, which is a standard Insertion Sort, finalizing the heavily pre-sorted array efficiently.</li>
+      </ul>
+  `,
+  merge: `
+      <div class="concept-title">Merge Sort - Conceptual Logic</div>
+      <p>Merge Sort is an efficient, stable, divide-and-conquer algorithm. It works by repeatedly breaking down a list into several sublists until each sublist consists of a single element, and then recursively merging those sublists back together into a sorted whole.</p>
+      <ul style="margin-left: 20px; margin-top: 10px;">
+        <li><strong>Step 1 (Divide):</strong> Find the midpoint of the array and divide it into two equal (or near-equal) halves.</li>
+        <li><strong>Step 2 (Conquer):</strong> Recursively call Merge Sort on the left half and the right half. This continues breaking down the array until the base case is reached: arrays of 1 element (which are technically already sorted).</li>
+        <li><strong>Step 3 (Merge):</strong> Take two sorted sub-arrays and prepare to merge them. Set a pointer at the beginning of each.</li>
+        <li><strong>Step 4:</strong> Compare the elements at the pointers. Pick the smaller element, place it into a temporary array, and move the pointer forward on the sub-array from which the element was taken.</li>
+        <li><strong>Step 5:</strong> Once one sub-array is completely exhausted, copy all remaining elements from the other sub-array directly into the temporary array.</li>
+        <li><strong>Step 6:</strong> Copy the sorted elements from the temporary array back into the original array space.</li>
+      </ul>
+  `,
+  quick: `
+      <div class="concept-title">Quick Sort - Conceptual Logic</div>
+      <p>QuickSort is a Divide and Conquer algorithm. It relies on picking a 'pivot' element and partitioning the array around it, ensuring the pivot ends up in its exact final sorted position during every pass.</p>
+      <ul style="margin-left: 20px; margin-top: 10px;">
+        <li><strong>Step 1:</strong> Select a 'pivot' element from the array (in this implementation, we usually pick the last element).</li>
+        <li><strong>Step 2 (Partitioning):</strong> Iterate through the array with two pointers. The goal is to move all elements smaller than the pivot to its left, and all elements larger than the pivot to its right.</li>
+        <li><strong>Step 3:</strong> To do this, maintain an index (i) for the smaller elements. If you encounter an element smaller than the pivot, increment (i) and swap the current element with the element at index (i).</li>
+        <li><strong>Step 4:</strong> Once the loop finishes, swap the pivot element with the element at (i + 1). The pivot is now completely locked in its correct sorted position.</li>
+        <li><strong>Step 5 (Recursion):</strong> Recursively apply Steps 1-4 to the sub-array to the left of the pivot, and the sub-array to the right of the pivot.</li>
+      </ul>
+  `,
+  heap: `
+      <div class="concept-title">Heap Sort - Conceptual Logic</div>
+      <p>Heap Sort is a comparison-based algorithm that uses a complete binary tree data structure (specifically, a Max-Heap) to sort elements. A Max-Heap ensures the parent node is always larger than its children.</p>
+      <ul style="margin-left: 20px; margin-top: 10px;">
+        <li><strong>Step 1 (Heapify):</strong> Transform the initial unsorted array into a Max-Heap. We do this by treating the array as a binary tree (where child nodes of index 'i' are at '2i+1' and '2i+2'). We iterate backwards from the middle of the array, sinking nodes down if they are smaller than their children.</li>
+        <li><strong>Step 2:</strong> Once the Max-Heap is built, the largest element in the entire array is guaranteed to be at the root (index 0).</li>
+        <li><strong>Step 3:</strong> Swap the root element (index 0) with the last element in the array. The largest element is now in its final, correct sorted position at the end of the array.</li>
+        <li><strong>Step 4:</strong> Reduce the considered size of the heap by 1 (ignoring the newly sorted element at the end).</li>
+        <li><strong>Step 5:</strong> The new root element might violate the Max-Heap property. Call the 'heapify' function on the root node to let it sink down to its proper place, restoring the Max-Heap structure.</li>
+        <li><strong>Step 6:</strong> Repeat Steps 3-5 until the heap size is reduced to 1.</li>
+      </ul>
+  `,
+  tree: `
+      <div class="concept-title">Tree Sort - Conceptual Logic</div>
+      <p>Tree sort builds a Binary Search Tree (BST) from the elements to be sorted, and then traverses the tree in an in-order fashion to write the elements back into the array in sorted order.</p>
+      <ul style="margin-left: 20px; margin-top: 10px;">
+        <li><strong>Step 1:</strong> Initialize an empty root node for a Binary Search Tree.</li>
+        <li><strong>Step 2:</strong> Iterate through the input array. For each element, insert it into the BST.</li>
+        <li><strong>Step 3:</strong> During insertion, compare the new element against the root node. If it is smaller, move to the left child. If it is larger, move to the right child. Repeat this until an empty spot is found, and attach the new node there.</li>
+        <li><strong>Step 4:</strong> Once all elements are inserted into the BST, begin an "In-Order Traversal" of the tree.</li>
+        <li><strong>Step 5 (Traversal):</strong> Recursively visit the left subtree, read the current node's value, then recursively visit the right subtree.</li>
+        <li><strong>Step 6:</strong> Write the read values sequentially back into the original array. Due to the properties of a BST, an in-order traversal naturally extracts the elements in ascending order.</li>
+      </ul>
+  `,
+  cycle: `
+      <div class="concept-title">Cycle Sort - Conceptual Logic</div>
+      <p>Cycle sort is an in-place, unstable sorting algorithm that is theoretically optimal in terms of memory writes. It works by decomposing the array into a number of cycles, calculating exactly where an item belongs, and putting it there.</p>
+      <ul style="margin-left: 20px; margin-top: 10px;">
+        <li><strong>Step 1:</strong> Start at the first element (index 0). Treat it as the starting point of a "cycle".</li>
+        <li><strong>Step 2:</strong> To find where this starting element belongs, count how many elements in the rest of the array are smaller than it. If there are 5 smaller elements, the starting element belongs exactly at index 5.</li>
+        <li><strong>Step 3:</strong> Swap the starting element with the element currently residing at index 5.</li>
+        <li><strong>Step 4:</strong> Now you are holding a new displaced element. Count how many elements are smaller than this new element to find its proper position, and swap it.</li>
+        <li><strong>Step 5:</strong> Continue this cyclical swapping process until the displaced element's proper position is the exact starting index you began with. The cycle is complete.</li>
+        <li><strong>Step 6:</strong> Move to the next index (index 1) and repeat the cycle process (skipping it if the element is already in the correct sorted spot).</li>
+      </ul>
+  `,
+  bitonic: `
+      <div class="concept-title">Bitonic Sort - Conceptual Logic</div>
+      <p>Bitonic sort is a parallel algorithm for sorting. It works by continuously creating "Bitonic Sequences" (sequences that monotonically increase, then monotonically decrease) and systematically merging them into fully sorted sequences.</p>
+      <ul style="margin-left: 20px; margin-top: 10px;">
+        <li><strong>Step 1:</strong> (Note: This algorithm specifically requires the array length to be a power of 2). Treat adjacent pairs of elements as bitonic sequences of length 2.</li>
+        <li><strong>Step 2:</strong> Sort half of these pairs in ascending order, and the other half in descending order. This combines them into bitonic sequences of length 4.</li>
+        <li><strong>Step 3:</strong> Perform a "Bitonic Merge" on the sequences of length 4. A bitonic merge involves comparing elements in the first half of the sequence with the corresponding elements in the second half, swapping them to push all smaller elements to one half and all larger elements to the other.</li>
+        <li><strong>Step 4:</strong> Recursively apply the bitonic merge to the two newly created halves until the sub-sequences are completely sorted either ascending or descending.</li>
+        <li><strong>Step 5:</strong> Repeat this process, doubling the length of the bitonic sequences at each stage (8, 16, 32...), until the entire array is one giant bitonic sequence that is merged into a final, ascending sorted array.</li>
+      </ul>
+  `,
+  counting: `
+      <div class="concept-title">Counting Sort - Conceptual Logic</div>
+      <p>Counting sort is an integer sorting algorithm that operates by counting the number of objects that have distinct key values. It is a non-comparison sort, making it incredibly fast (linear time) when the range of possible values is relatively small.</p>
+      <ul style="margin-left: 20px; margin-top: 10px;">
+        <li><strong>Step 1:</strong> Find the minimum and maximum values in the input array to determine the 'range' of the data.</li>
+        <li><strong>Step 2:</strong> Create an auxiliary 'count' array whose length equals the range of values, initialized with zeros.</li>
+        <li><strong>Step 3:</strong> Iterate through the input array. For each element, map its value to an index in the 'count' array (e.g., if the value is 5, go to index 5), and increment the count at that index by 1.</li>
+        <li><strong>Step 4:</strong> Once the input array is fully tallied, the 'count' array essentially holds a histogram of the data.</li>
+        <li><strong>Step 5:</strong> Reconstruct the sorted array. Iterate through the 'count' array in order. If the count at index 'i' is 3, write the value 'i' into the original array 3 times in a row. Repeat until the 'count' array is exhausted.</li>
+      </ul>
+  `,
+  bucket: `
+      <div class="concept-title">Bucket Sort - Conceptual Logic</div>
+      <p>Bucket sort, or bin sort, is a sorting algorithm that works by distributing the elements of an array into a number of logical buckets. Each bucket is then sorted individually, usually using a different sorting algorithm.</p>
+      <ul style="margin-left: 20px; margin-top: 10px;">
+        <li><strong>Step 1:</strong> Determine the number of buckets to use (often equal to the number of elements, 'n').</li>
+        <li><strong>Step 2:</strong> Initialize an array of empty buckets (lists/arrays).</li>
+        <li><strong>Step 3 (Scatter):</strong> Iterate through the original array. For each element, calculate a mathematical hash or ratio (e.g., (value - min) / range * number_of_buckets) to determine which bucket it belongs in. Push the element into that bucket.</li>
+        <li><strong>Step 4:</strong> Once all elements are distributed, visit each bucket one by one.</li>
+        <li><strong>Step 5 (Sort):</strong> Sort the contents of each individual bucket using a standard comparison sort (this implementation uses JavaScript's native sort, which acts similarly to Insertion Sort on small datasets).</li>
+        <li><strong>Step 6 (Gather):</strong> Iterate through the buckets in order, appending the sorted contents of each bucket back into the original array sequentially.</li>
+      </ul>
+  `,
+  pigeonhole: `
+      <div class="concept-title">Pigeonhole Sort - Conceptual Logic</div>
+      <p>Pigeonhole Sort is a sorting algorithm that is suitable for sorting lists of elements where the number of elements and the number of possible key values are approximately the same. It is extremely similar to Counting Sort but moves elements rather than just tallies.</p>
+      <ul style="margin-left: 20px; margin-top: 10px;">
+        <li><strong>Step 1:</strong> Find the minimum and maximum values in the array. Calculate the total range: (Max - Min + 1).</li>
+        <li><strong>Step 2:</strong> Set up an array of initially empty "pigeonholes", the same size as the range.</li>
+        <li><strong>Step 3:</strong> Iterate over the input array. For each element, calculate its proper pigeonhole index using the formula: (Element Value - Min).</li>
+        <li><strong>Step 4:</strong> Place the element into that calculated pigeonhole. In this numerical implementation, we increment the pigeonhole value to signify an element was placed there.</li>
+        <li><strong>Step 5:</strong> After all elements have been put into their respective pigeonholes, iterate over the pigeonhole array in order.</li>
+        <li><strong>Step 6:</strong> For every element found in a pigeonhole, copy it back into the original array. Because the pigeonholes are evaluated sequentially from left to right, the elements are written out in perfectly sorted order.</li>
+      </ul>
+  `,
+  bogo: `
+      <div class="concept-title">Bogo Sort - Conceptual Logic</div>
+      <p>Bogo Sort (also known as permutation sort or stupid sort) is a highly inefficient algorithm based on the generate and test paradigm. It is used exclusively as a joke in computer science.</p>
+      <ul style="margin-left: 20px; margin-top: 10px;">
+        <li><strong>Step 1:</strong> Check if the array is perfectly sorted. If it is, you are done.</li>
+        <li><strong>Step 2:</strong> If the array is not sorted, randomly shuffle all the elements in the array (like throwing a deck of cards into the air and picking them up randomly).</li>
+        <li><strong>Step 3:</strong> Check if the newly shuffled array happens to be sorted by pure coincidence.</li>
+        <li><strong>Step 4:</strong> If not, shuffle again. Repeat until the heat death of the universe or until the array randomly aligns in perfect order.</li>
+        <li><em>*Note: In this visualizer, Bogo Sort is capped at 4000 attempts to prevent browser crashing, at which point it gives up and force-sorts the array.</em></li>
+      </ul>
+  `
+};
+
+// FULLY COMPLETE SOURCE CODE IMPLEMENTATIONS
+const CODES = {
+  bubble: {
+    go: `func sort(arr []int) {\n    n := len(arr)\n    for i := 0; i < n-1; i++ {\n        swapped := false\n        for j := 0; j < n-i-1; j++ {\n            if arr[j] > arr[j+1] {\n                arr[j], arr[j+1] = arr[j+1], arr[j]\n                swapped = true\n            }\n        }\n        if !swapped { break }\n    }\n}`,
+    python: `def sort(arr):\n    n = len(arr)\n    for i in range(n-1):\n        swapped = False\n        for j in range(n-i-1):\n            if arr[j] > arr[j+1]:\n                arr[j], arr[j+1] = arr[j+1], arr[j]\n                swapped = True\n        if not swapped: break\n    return arr`,
+    java: `static void sort(int[] arr) {\n    int n = arr.length;\n    for (int i = 0; i < n-1; i++) {\n        boolean swapped = false;\n        for (int j = 0; j < n-i-1; j++) {\n            if (arr[j] > arr[j+1]) {\n                int temp = arr[j];\n                arr[j] = arr[j+1];\n                arr[j+1] = temp;\n                swapped = true;\n            }\n        }\n        if (!swapped) break;\n    }\n}`,
+    c: `void sort(int arr[], int n) {\n    for (int i = 0; i < n-1; i++) {\n        int swapped = 0;\n        for (int j = 0; j < n-i-1; j++) {\n            if (arr[j] > arr[j+1]) {\n                int temp = arr[j];\n                arr[j] = arr[j+1];\n                arr[j+1] = temp;\n                swapped = 1;\n            }\n        }\n        if (!swapped) break;\n    }\n}`
+  },
+  selection: {
+    go: `func sort(arr []int) {\n    n := len(arr)\n    for i := 0; i < n-1; i++ {\n        minIdx := i\n        for j := i+1; j < n; j++ {\n            if arr[j] < arr[minIdx] {\n                minIdx = j\n            }\n        }\n        arr[i], arr[minIdx] = arr[minIdx], arr[i]\n    }\n}`,
+    python: `def sort(arr):\n    n = len(arr)\n    for i in range(n-1):\n        min_idx = i\n        for j in range(i+1, n):\n            if arr[j] < arr[min_idx]:\n                min_idx = j\n        arr[i], arr[min_idx] = arr[min_idx], arr[i]\n    return arr`,
+    java: `static void sort(int[] arr) {\n    int n = arr.length;\n    for (int i = 0; i < n-1; i++) {\n        int minIdx = i;\n        for (int j = i+1; j < n; j++) {\n            if (arr[j] < arr[minIdx]) minIdx = j;\n        }\n        int temp = arr[minIdx];\n        arr[minIdx] = arr[i];\n        arr[i] = temp;\n    }\n}`,
+    c: `void sort(int arr[], int n) {\n    for (int i = 0; i < n-1; i++) {\n        int minIdx = i;\n        for (int j = i+1; j < n; j++) {\n            if (arr[j] < arr[minIdx]) minIdx = j;\n        }\n        int temp = arr[minIdx];\n        arr[minIdx] = arr[i];\n        arr[i] = temp;\n    }\n}`
+  },
+  insertion: {
+    go: `func sort(arr []int) {\n    for i := 1; i < len(arr); i++ {\n        key := arr[i]\n        j := i - 1\n        for j >= 0 && arr[j] > key {\n            arr[j+1] = arr[j]\n            j--\n        }\n        arr[j+1] = key\n    }\n}`,
+    python: `def sort(arr):\n    for i in range(1, len(arr)):\n        key = arr[i]\n        j = i - 1\n        while j >= 0 and key < arr[j]:\n            arr[j + 1] = arr[j]\n            j -= 1\n        arr[j + 1] = key\n    return arr`,
+    java: `static void sort(int[] arr) {\n    int n = arr.length;\n    for (int i = 1; i < n; ++i) {\n        int key = arr[i];\n        int j = i - 1;\n        while (j >= 0 && arr[j] > key) {\n            arr[j + 1] = arr[j];\n            j = j - 1;\n        }\n        arr[j + 1] = key;\n    }\n}`,
+    c: `void sort(int arr[], int n) {\n    for (int i = 1; i < n; i++) {\n        int key = arr[i];\n        int j = i - 1;\n        while (j >= 0 && arr[j] > key) {\n            arr[j + 1] = arr[j];\n            j = j - 1;\n        }\n        arr[j + 1] = key;\n    }\n}`
+  },
+  gnome: {
+    go: `func sort(arr []int) {\n    i := 0\n    for i < len(arr) {\n        if i == 0 || arr[i] >= arr[i-1] {\n            i++\n        } else {\n            arr[i], arr[i-1] = arr[i-1], arr[i]\n            i--\n        }\n    }\n}`,
+    python: `def sort(arr):\n    i = 0\n    while i < len(arr):\n        if i == 0 or arr[i] >= arr[i-1]:\n            i += 1\n        else:\n            arr[i], arr[i-1] = arr[i-1], arr[i]\n            i -= 1\n    return arr`,
+    java: `static void sort(int[] arr) {\n    int i = 0;\n    while (i < arr.length) {\n        if (i == 0 || arr[i] >= arr[i - 1]) i++;\n        else {\n            int temp = arr[i];\n            arr[i] = arr[i - 1];\n            arr[i - 1] = temp;\n            i--;\n        }\n    }\n}`,
+    c: `void sort(int arr[], int n) {\n    int i = 0;\n    while (i < n) {\n        if (i == 0 || arr[i] >= arr[i - 1]) i++;\n        else {\n            int temp = arr[i];\n            arr[i] = arr[i - 1];\n            arr[i - 1] = temp;\n            i--;\n        }\n    }\n}`
+  },
+  cocktail: {
+    go: `func sort(arr []int) {\n    start, end := 0, len(arr)-1\n    swapped := true\n    for swapped {\n        swapped = false\n        for i := start; i < end; i++ {\n            if arr[i] > arr[i+1] {\n                arr[i], arr[i+1] = arr[i+1], arr[i]\n                swapped = true\n            }\n        }\n        if !swapped { break }\n        swapped = false; end--\n        for i := end - 1; i >= start; i-- {\n            if arr[i] > arr[i+1] {\n                arr[i], arr[i+1] = arr[i+1], arr[i]\n                swapped = true\n            }\n        }\n        start++\n    }\n}`,
+    python: `def sort(arr):\n    n = len(arr)\n    swapped = True\n    start, end = 0, n-1\n    while swapped:\n        swapped = False\n        for i in range(start, end):\n            if arr[i] > arr[i+1]:\n                arr[i], arr[i+1] = arr[i+1], arr[i]\n                swapped = True\n        if not swapped: break\n        swapped = False; end -= 1\n        for i in range(end-1, start-1, -1):\n            if arr[i] > arr[i+1]:\n                arr[i], arr[i+1] = arr[i+1], arr[i]\n                swapped = True\n        start += 1\n    return arr`,
+    java: `static void sort(int[] arr) {\n    boolean swapped = true;\n    int start = 0, end = arr.length - 1;\n    while (swapped) {\n        swapped = false;\n        for (int i = start; i < end; ++i) {\n            if (arr[i] > arr[i + 1]) {\n                int temp = arr[i]; arr[i] = arr[i + 1]; arr[i + 1] = temp;\n                swapped = true;\n            }\n        }\n        if (!swapped) break;\n        swapped = false; end = end - 1;\n        for (int i = end - 1; i >= start; i--) {\n            if (arr[i] > arr[i + 1]) {\n                int temp = arr[i]; arr[i] = arr[i + 1]; arr[i + 1] = temp;\n                swapped = true;\n            }\n        }\n        start = start + 1;\n    }\n}`,
+    c: `void sort(int arr[], int n) {\n    int swapped = 1, start = 0, end = n - 1;\n    while (swapped) {\n        swapped = 0;\n        for (int i = start; i < end; ++i) {\n            if (arr[i] > arr[i + 1]) {\n                int temp = arr[i]; arr[i] = arr[i + 1]; arr[i + 1] = temp;\n                swapped = 1;\n            }\n        }\n        if (!swapped) break;\n        swapped = 0; end--;\n        for (int i = end - 1; i >= start; --i) {\n            if (arr[i] > arr[i + 1]) {\n                int temp = arr[i]; arr[i] = arr[i + 1]; arr[i + 1] = temp;\n                swapped = 1;\n            }\n        }\n        start++;\n    }\n}`
+  },
+  comb: {
+    go: `func sort(arr []int) {\n    gap := len(arr)\n    swapped := true\n    for gap > 1 || swapped {\n        gap = int(float64(gap) / 1.3)\n        if gap < 1 { gap = 1 }\n        swapped = false\n        for i := 0; i+gap < len(arr); i++ {\n            if arr[i] > arr[i+gap] {\n                arr[i], arr[i+gap] = arr[i+gap], arr[i]\n                swapped = true\n            }\n        }\n    }\n}`,
+    python: `def sort(arr):\n    gap = len(arr)\n    swapped = True\n    while gap > 1 or swapped:\n        gap = max(1, int(gap / 1.3))\n        swapped = False\n        for i in range(len(arr) - gap):\n            if arr[i] > arr[i + gap]:\n                arr[i], arr[i + gap] = arr[i + gap], arr[i]\n                swapped = True\n    return arr`,
+    java: `static void sort(int[] arr) {\n    int gap = arr.length;\n    boolean swapped = true;\n    while (gap > 1 || swapped) {\n        gap = (int)(gap / 1.3);\n        if (gap < 1) gap = 1;\n        swapped = false;\n        for (int i = 0; i + gap < arr.length; i++) {\n            if (arr[i] > arr[i + gap]) {\n                int temp = arr[i]; arr[i] = arr[i + gap]; arr[i + gap] = temp;\n                swapped = true;\n            }\n        }\n    }\n}`,
+    c: `void sort(int arr[], int n) {\n    int gap = n, swapped = 1;\n    while (gap > 1 || swapped) {\n        gap = (gap * 10) / 13;\n        if (gap < 1) gap = 1;\n        swapped = 0;\n        for (int i = 0; i + gap < n; i++) {\n            if (arr[i] > arr[i + gap]) {\n                int temp = arr[i]; arr[i] = arr[i + gap]; arr[i + gap] = temp;\n                swapped = 1;\n            }\n        }\n    }\n}`
+  },
+  shell: {
+    go: `func sort(arr []int) {\n    n := len(arr)\n    for gap := n/2; gap > 0; gap /= 2 {\n        for i := gap; i < n; i++ {\n            temp := arr[i]\n            j := i\n            for ; j >= gap && arr[j-gap] > temp; j -= gap {\n                arr[j] = arr[j-gap]\n            }\n            arr[j] = temp\n        }\n    }\n}`,
+    python: `def sort(arr):\n    n = len(arr)\n    gap = n // 2\n    while gap > 0:\n        for i in range(gap, n):\n            temp = arr[i]\n            j = i\n            while j >= gap and arr[j - gap] > temp:\n                arr[j] = arr[j - gap]\n                j -= gap\n            arr[j] = temp\n        gap //= 2\n    return arr`,
+    java: `static void sort(int[] arr) {\n    int n = arr.length;\n    for (int gap = n/2; gap > 0; gap /= 2) {\n        for (int i = gap; i < n; i++) {\n            int temp = arr[i];\n            int j;\n            for (j = i; j >= gap && arr[j - gap] > temp; j -= gap)\n                arr[j] = arr[j - gap];\n            arr[j] = temp;\n        }\n    }\n}`,
+    c: `void sort(int arr[], int n) {\n    for (int gap = n/2; gap > 0; gap /= 2) {\n        for (int i = gap; i < n; i++) {\n            int temp = arr[i];\n            int j;\n            for (j = i; j >= gap && arr[j - gap] > temp; j -= gap)\n                arr[j] = arr[j - gap];\n            arr[j] = temp;\n        }\n    }\n}`
+  },
+  merge: {
+    go: `func sort(arr []int) {\n    if len(arr) <= 1 { return }\n    mid := len(arr)/2\n    left := make([]int, mid)\n    right := make([]int, len(arr)-mid)\n    copy(left, arr[:mid])\n    copy(right, arr[mid:])\n    sort(left)\n    sort(right)\n    i, j, k := 0, 0, 0\n    for i < len(left) && j < len(right) {\n        if left[i] <= right[j] { arr[k] = left[i]; i++ } else { arr[k] = right[j]; j++ }\n        k++\n    }\n    for i < len(left) { arr[k] = left[i]; i++; k++ }\n    for j < len(right) { arr[k] = right[j]; j++; k++ }\n}`,
+    python: `def sort(arr):\n    if len(arr) > 1:\n        mid = len(arr) // 2\n        L = arr[:mid]\n        R = arr[mid:]\n        sort(L)\n        sort(R)\n        i = j = k = 0\n        while i < len(L) and j < len(R):\n            if L[i] <= R[j]: arr[k] = L[i]; i += 1\n            else: arr[k] = R[j]; j += 1\n            k += 1\n        while i < len(L): arr[k] = L[i]; i += 1; k += 1\n        while j < len(R): arr[k] = R[j]; j += 1; k += 1\n    return arr`,
+    java: `static void merge(int[] arr, int l, int m, int r) {\n        int n1 = m - l + 1, n2 = r - m;\n        int[] L = new int[n1], R = new int[n2];\n        for (int i=0; i<n1; ++i) L[i] = arr[l + i];\n        for (int j=0; j<n2; ++j) R[j] = arr[m + 1 + j];\n        int i = 0, j = 0, k = l;\n        while (i < n1 && j < n2) { if (L[i] <= R[j]) arr[k++] = L[i++]; else arr[k++] = R[j++]; }\n        while (i < n1) arr[k++] = L[i++];\n        while (j < n2) arr[k++] = R[j++];\n    }\n    static void ms(int[] arr, int l, int r) {\n        if (l < r) { int m = l + (r - l) / 2; ms(arr, l, m); ms(arr, m + 1, r); merge(arr, l, m, r); }\n    }\n    static void sort(int[] arr) { ms(arr, 0, arr.length - 1); }`,
+    c: `void merge(int arr[], int l, int m, int r) {\n    int n1 = m - l + 1, n2 = r - m;\n    int *L = (int*)malloc(n1*sizeof(int)), *R = (int*)malloc(n2*sizeof(int));\n    for(int i=0; i<n1; i++) L[i] = arr[l + i];\n    for(int j=0; j<n2; j++) R[j] = arr[m + 1 + j];\n    int i = 0, j = 0, k = l;\n    while(i < n1 && j < n2) { if(L[i] <= R[j]) arr[k++] = L[i++]; else arr[k++] = R[j++]; }\n    while(i < n1) arr[k++] = L[i++];\n    while(j < n2) arr[k++] = R[j++];\n    free(L); free(R);\n}\nvoid ms(int arr[], int l, int r) {\n    if (l < r) { int m = l + (r - l) / 2; ms(arr, l, m); ms(arr, m + 1, r); merge(arr, l, m, r); }\n}\nvoid sort(int arr[], int n) { ms(arr, 0, n - 1); }`
+  },
+  quick: {
+    go: `func sort(arr []int) {\n    if len(arr) < 2 { return }\n    pivot := arr[len(arr)-1]\n    i := -1\n    for j := 0; j < len(arr)-1; j++ {\n        if arr[j] < pivot {\n            i++\n            arr[i], arr[j] = arr[j], arr[i]\n        }\n    }\n    arr[i+1], arr[len(arr)-1] = arr[len(arr)-1], arr[i+1]\n    sort(arr[:i+1])\n    sort(arr[i+2:])\n}`,
+    python: `def qs(arr, low, high):\n    if low < high:\n        pivot = arr[high]\n        i = low - 1\n        for j in range(low, high):\n            if arr[j] < pivot:\n                i += 1\n                arr[i], arr[j] = arr[j], arr[i]\n        arr[i+1], arr[high] = arr[high], arr[i+1]\n        qs(arr, low, i)\n        qs(arr, i + 2, high)\n\ndef sort(arr):\n    qs(arr, 0, len(arr)-1)\n    return arr`,
+    java: `static void qs(int[] arr, int low, int high) {\n    if (low < high) {\n        int pivot = arr[high];\n        int i = (low - 1);\n        for (int j = low; j < high; j++) {\n            if (arr[j] < pivot) {\n                i++;\n                int temp = arr[i]; arr[i] = arr[j]; arr[j] = temp;\n            }\n        }\n        int temp = arr[i+1]; arr[i+1] = arr[high]; arr[high] = temp;\n        qs(arr, low, i);\n        qs(arr, i + 2, high);\n    }\n}\n    static void sort(int[] arr) { qs(arr, 0, arr.length - 1); }`,
+    c: `void qs(int arr[], int low, int high) {\n    if (low < high) {\n        int pivot = arr[high];\n        int i = (low - 1);\n        for (int j = low; j < high; j++) {\n            if (arr[j] < pivot) {\n                i++;\n                int temp = arr[i]; arr[i] = arr[j]; arr[j] = temp;\n            }\n        }\n        int temp = arr[i+1]; arr[i+1] = arr[high]; arr[high] = temp;\n        qs(arr, low, i);\n        qs(arr, i + 2, high);\n    }\n}\nvoid sort(int arr[], int n) { qs(arr, 0, n - 1); }`
+  },
+  heap: {
+    go: `func heapify(arr []int, n, i int) {\n    largest := i\n    l := 2*i + 1\n    r := 2*i + 2\n    if l < n && arr[l] > arr[largest] { largest = l }\n    if r < n && arr[r] > arr[largest] { largest = r }\n    if largest != i {\n        arr[i], arr[largest] = arr[largest], arr[i]\n        heapify(arr, n, largest)\n    }\n}\nfunc sort(arr []int) {\n    n := len(arr)\n    for i := n/2 - 1; i >= 0; i-- { heapify(arr, n, i) }\n    for i := n - 1; i > 0; i-- {\n        arr[0], arr[i] = arr[i], arr[0]\n        heapify(arr, i, 0)\n    }\n}`,
+    python: `def heapify(arr, n, i):\n    largest = i\n    l = 2 * i + 1\n    r = 2 * i + 2\n    if l < n and arr[l] > arr[largest]: largest = l\n    if r < n and arr[r] > arr[largest]: largest = r\n    if largest != i:\n        arr[i], arr[largest] = arr[largest], arr[i]\n        heapify(arr, n, largest)\n\ndef sort(arr):\n    n = len(arr)\n    for i in range(n // 2 - 1, -1, -1): heapify(arr, n, i)\n    for i in range(n - 1, 0, -1):\n        arr[0], arr[i] = arr[i], arr[0]\n        heapify(arr, i, 0)\n    return arr`,
+    java: `static void heapify(int[] arr, int n, int i) {\n    int largest = i, l = 2*i + 1, r = 2*i + 2;\n    if (l < n && arr[l] > arr[largest]) largest = l;\n    if (r < n && arr[r] > arr[largest]) largest = r;\n    if (largest != i) { int t = arr[i]; arr[i] = arr[largest]; arr[largest] = t; heapify(arr, n, largest); }\n}\nstatic void sort(int[] arr) {\n    int n = arr.length;\n    for (int i = n / 2 - 1; i >= 0; i--) heapify(arr, n, i);\n    for (int i = n - 1; i > 0; i--) { int t = arr[0]; arr[0] = arr[i]; arr[i] = t; heapify(arr, i, 0); }\n}`,
+    c: `void heapify(int arr[], int n, int i) {\n    int largest = i, l = 2*i + 1, r = 2*i + 2;\n    if (l < n && arr[l] > arr[largest]) largest = l;\n    if (r < n && arr[r] > arr[largest]) largest = r;\n    if (largest != i) { int t = arr[i]; arr[i] = arr[largest]; arr[largest] = t; heapify(arr, n, largest); }\n}\nvoid sort(int arr[], int n) {\n    for (int i = n / 2 - 1; i >= 0; i--) heapify(arr, n, i);\n    for (int i = n - 1; i > 0; i--) { int t = arr[0]; arr[0] = arr[i]; arr[i] = t; heapify(arr, i, 0); }\n}`
+  },
+  tree: {
+    go: `type Node struct { key int; left, right *Node }\nfunc insert(node *Node, key int) *Node {\n    if node == nil { return &Node{key: key} }\n    if key < node.key { node.left = insert(node.left, key) } else { node.right = insert(node.right, key) }\n    return node\n}\nfunc store(root *Node, arr []int, i *int) {\n    if root != nil {\n        store(root.left, arr, i)\n        arr[*i] = root.key; *i++\n        store(root.right, arr, i)\n    }\n}\nfunc sort(arr []int) {\n    var root *Node\n    for _, v := range arr { root = insert(root, v) }\n    i := 0; store(root, arr, &i)\n}`,
+    python: `class Node:\n    def __init__(self, key):\n        self.val = key\n        self.left = self.right = None\ndef insert(root, key):\n    if root is None: return Node(key)\n    if root.val < key: root.right = insert(root.right, key)\n    else: root.left = insert(root.left, key)\n    return root\ndef store(root, arr, res):\n    if root:\n        store(root.left, arr, res)\n        res.append(root.val)\n        store(root.right, arr, res)\ndef sort(arr):\n    root = Node(arr[0])\n    for i in range(1, len(arr)): insert(root, arr[i])\n    res = []\n    store(root, arr, res)\n    for i in range(len(arr)): arr[i] = res[i]\n    return arr`,
+    java: `static class Node { int key; Node left, right; Node(int item) { key = item; } }\nstatic Node insert(Node root, int key) {\n    if (root == null) return new Node(key);\n    if (key < root.key) root.left = insert(root.left, key); else root.right = insert(root.right, key);\n    return root;\n}\nstatic void store(Node root, int[] arr, int[] idx) {\n    if (root != null) { store(root.left, arr, idx); arr[idx[0]++] = root.key; store(root.right, arr, idx); }\n}\nstatic void sort(int[] arr) {\n    Node root = null;\n    for (int i=0; i<arr.length; i++) root = insert(root, arr[i]);\n    store(root, arr, new int[]{0});\n}`,
+    c: `struct Node { int key; struct Node *left, *right; };\nstruct Node* newNode(int item) { struct Node* temp = (struct Node*)malloc(sizeof(struct Node)); temp->key = item; temp->left = temp->right = NULL; return temp; }\nstruct Node* insert(struct Node* node, int key) {\n    if (node == NULL) return newNode(key);\n    if (key < node->key) node->left = insert(node->left, key); else node->right = insert(node->right, key);\n    return node;\n}\nvoid store(struct Node* root, int arr[], int* i) {\n    if (root != NULL) { store(root->left, arr, i); arr[(*i)++] = root->key; store(root->right, arr, i); }\n}\nvoid sort(int arr[], int n) {\n    struct Node* root = NULL;\n    for (int i = 0; i < n; i++) root = insert(root, arr[i]);\n    int idx = 0; store(root, arr, &idx);\n}`
+  },
+  cycle: {
+    go: `func sort(arr []int) {\n    n := len(arr)\n    for cs := 0; cs < n-1; cs++ {\n        item := arr[cs]; pos := cs\n        for i := cs + 1; i < n; i++ { if arr[i] < item { pos++ } }\n        if pos == cs { continue }\n        for item == arr[pos] { pos++ }\n        item, arr[pos] = arr[pos], item\n        for pos != cs {\n            pos = cs\n            for i := cs + 1; i < n; i++ { if arr[i] < item { pos++ } }\n            for item == arr[pos] { pos++ }\n            item, arr[pos] = arr[pos], item\n        }\n    }\n}`,
+    python: `def sort(arr):\n    n = len(arr)\n    for cs in range(n - 1):\n        item = arr[cs]; pos = cs\n        for i in range(cs + 1, n): \n            if arr[i] < item: pos += 1\n        if pos == cs: continue\n        while item == arr[pos]: pos += 1\n        arr[pos], item = item, arr[pos]\n        while pos != cs:\n            pos = cs\n            for i in range(cs + 1, n):\n                if arr[i] < item: pos += 1\n            while item == arr[pos]: pos += 1\n            arr[pos], item = item, arr[pos]\n    return arr`,
+    java: `static void sort(int[] arr) {\n    int n = arr.length;\n    for (int cs = 0; cs < n - 1; cs++) {\n        int item = arr[cs]; int pos = cs;\n        for (int i = cs + 1; i < n; i++) if (arr[i] < item) pos++;\n        if (pos == cs) continue;\n        while (item == arr[pos]) pos++;\n        int temp = arr[pos]; arr[pos] = item; item = temp;\n        while (pos != cs) {\n            pos = cs;\n            for (int i = cs + 1; i < n; i++) if (arr[i] < item) pos++;\n            while (item == arr[pos]) pos++;\n            temp = arr[pos]; arr[pos] = item; item = temp;\n        }\n    }\n}`,
+    c: `void sort(int arr[], int n) {\n    for (int cs = 0; cs < n - 1; cs++) {\n        int item = arr[cs]; int pos = cs;\n        for (int i = cs + 1; i < n; i++) if (arr[i] < item) pos++;\n        if (pos == cs) continue;\n        while (item == arr[pos]) pos++;\n        int temp = arr[pos]; arr[pos] = item; item = temp;\n        while (pos != cs) {\n            pos = cs;\n            for (int i = cs + 1; i < n; i++) if (arr[i] < item) pos++;\n            while (item == arr[pos]) pos++;\n            temp = arr[pos]; arr[pos] = item; item = temp;\n        }\n    }\n}`
+  },
+  bitonic: {
+    go: `func compAndSwap(a []int, i, j, dir int) {\n    if (dir == 1 && a[i] > a[j]) || (dir == 0 && a[i] < a[j]) { a[i], a[j] = a[j], a[i] }\n}\nfunc merge(a []int, low, cnt, dir int) {\n    if cnt > 1 {\n        k := cnt / 2\n        for i := low; i < low+k; i++ { compAndSwap(a, i, i+k, dir) }\n        merge(a, low, k, dir); merge(a, low+k, k, dir)\n    }\n}\nfunc bSort(a []int, low, cnt, dir int) {\n    if cnt > 1 {\n        k := cnt / 2\n        bSort(a, low, k, 1); bSort(a, low+k, k, 0); merge(a, low, cnt, dir)\n    }\n}\nfunc sort(a []int) { bSort(a, 0, len(a), 1) }`,
+    python: `def compAndSwap(a, i, j, dir):\n    if (dir==1 and a[i]>a[j]) or (dir==0 and a[i]<a[j]): a[i],a[j] = a[j],a[i]\ndef bitonicMerge(a, low, cnt, dir):\n    if cnt > 1:\n        k = cnt // 2\n        for i in range(low, low + k): compAndSwap(a, i, i+k, dir)\n        bitonicMerge(a, low, k, dir); bitonicMerge(a, low+k, k, dir)\ndef bitonicSort(a, low, cnt, dir):\n    if cnt > 1:\n        k = cnt // 2\n        bitonicSort(a, low, k, 1); bitonicSort(a, low+k, k, 0); bitonicMerge(a, low, cnt, dir)\ndef sort(arr): # Needs power of 2 length\n    bitonicSort(arr, 0, len(arr), 1)\n    return arr`,
+    java: `static void compAndSwap(int[] a, int i, int j, int dir) {\n    if ((dir == 1 && a[i] > a[j]) || (dir == 0 && a[i] < a[j])) { int t = a[i]; a[i] = a[j]; a[j] = t; }\n}\nstatic void bitonicMerge(int[] a, int low, int cnt, int dir) {\n    if (cnt > 1) {\n        int k = cnt / 2;\n        for (int i = low; i < low + k; i++) compAndSwap(a, i, i + k, dir);\n        bitonicMerge(a, low, k, dir); bitonicMerge(a, low + k, k, dir);\n    }\n}\nstatic void bitonicSort(int[] a, int low, int cnt, int dir) {\n    if (cnt > 1) { int k = cnt / 2; bitonicSort(a, low, k, 1); bitonicSort(a, low + k, k, 0); bitonicMerge(a, low, cnt, dir); }\n}\nstatic void sort(int[] arr) { bitonicSort(arr, 0, arr.length, 1); }`,
+    c: `void compAndSwap(int a[], int i, int j, int dir) {\n    if ((dir == 1 && a[i] > a[j]) || (dir == 0 && a[i] < a[j])) { int t = a[i]; a[i] = a[j]; a[j] = t; }\n}\nvoid bitonicMerge(int a[], int low, int cnt, int dir) {\n    if (cnt > 1) {\n        int k = cnt / 2;\n        for (int i = low; i < low + k; i++) compAndSwap(a, i, i + k, dir);\n        bitonicMerge(a, low, k, dir); bitonicMerge(a, low + k, k, dir);\n    }\n}\nvoid bitonicSort(int a[], int low, int cnt, int dir) {\n    if (cnt > 1) { int k = cnt / 2; bitonicSort(a, low, k, 1); bitonicSort(a, low + k, k, 0); bitonicMerge(a, low, cnt, dir); }\n}\nvoid sort(int arr[], int n) { bitonicSort(arr, 0, n, 1); }`
+  },
+  counting: {
+    go: `func sort(arr []int) {\n    if len(arr) == 0 { return }\n    max, min := arr[0], arr[0]\n    for _, v := range arr { if v > max { max = v }; if v < min { min = v } }\n    count := make([]int, max-min+1)\n    for _, v := range arr { count[v-min]++ }\n    idx := 0\n    for i, c := range count { for c > 0 { arr[idx] = i + min; idx++; c-- } }\n}`,
+    python: `def sort(arr):\n    if not arr: return arr\n    mx, mn = max(arr), min(arr)\n    count = [0] * (mx - mn + 1)\n    for v in arr: count[v - mn] += 1\n    idx = 0\n    for i, c in enumerate(count):\n        while c > 0:\n            arr[idx] = i + mn\n            idx += 1; c -= 1\n    return arr`,
+    java: `static void sort(int[] arr) {\n    if (arr.length == 0) return;\n    int max = arr[0], min = arr[0];\n    for (int i=1; i<arr.length; i++) { if (arr[i] > max) max = arr[i]; if (arr[i] < min) min = arr[i]; }\n    int[] count = new int[max - min + 1];\n    for (int i=0; i<arr.length; i++) count[arr[i] - min]++;\n    int idx = 0;\n    for (int i=0; i<count.length; i++) { while (count[i] > 0) { arr[idx++] = i + min; count[i]--; } }\n}`,
+    c: `void sort(int arr[], int n) {\n    if (n == 0) return;\n    int max = arr[0], min = arr[0];\n    for (int i=1; i<n; i++) { if (arr[i] > max) max = arr[i]; if (arr[i] < min) min = arr[i]; }\n    int range = max - min + 1;\n    int* count = (int*)calloc(range, sizeof(int));\n    for (int i=0; i<n; i++) count[arr[i] - min]++;\n    int idx = 0;\n    for (int i=0; i<range; i++) { while (count[i] > 0) { arr[idx++] = i + min; count[i]--; } }\n    free(count);\n}`
+  },
+  radix: {
+    go: `func sort(arr []int) {\n    if len(arr) == 0 { return }\n    max := arr[0]\n    for _, v := range arr { if v > max { max = v } }\n    for exp := 1; max/exp > 0; exp *= 10 {\n        output := make([]int, len(arr)); count := make([]int, 10)\n        for i := 0; i < len(arr); i++ { count[(arr[i]/exp)%10]++ }\n        for i := 1; i < 10; i++ { count[i] += count[i-1] }\n        for i := len(arr) - 1; i >= 0; i-- { output[count[(arr[i]/exp)%10]-1] = arr[i]; count[(arr[i]/exp)%10]-- }\n        for i := 0; i < len(arr); i++ { arr[i] = output[i] }\n    }\n}`,
+    python: `def sort(arr):\n    if not arr: return arr\n    max_val = max(arr)\n    exp = 1\n    while max_val // exp > 0:\n        output = [0] * len(arr); count = [0] * 10\n        for i in range(len(arr)): count[(arr[i] // exp) % 10] += 1\n        for i in range(1, 10): count[i] += count[i - 1]\n        for i in range(len(arr) - 1, -1, -1):\n            idx = (arr[i] // exp) % 10\n            output[count[idx] - 1] = arr[i]\n            count[idx] -= 1\n        for i in range(len(arr)): arr[i] = output[i]\n        exp *= 10\n    return arr`,
+    java: `static void sort(int[] arr) {\n    if(arr.length == 0) return;\n    int max = arr[0];\n    for(int i=1; i<arr.length; i++) if(arr[i] > max) max = arr[i];\n    for(int exp = 1; max/exp > 0; exp *= 10) {\n        int[] output = new int[arr.length]; int[] count = new int[10];\n        for(int i=0; i<arr.length; i++) count[(arr[i]/exp)%10]++;\n        for(int i=1; i<10; i++) count[i] += count[i-1];\n        for(int i=arr.length-1; i>=0; i--) { output[count[(arr[i]/exp)%10]-1] = arr[i]; count[(arr[i]/exp)%10]--; }\n        for(int i=0; i<arr.length; i++) arr[i] = output[i];\n    }\n}`,
+    c: `void sort(int arr[], int n) {\n    if(n == 0) return;\n    int max = arr[0];\n    for(int i=1; i<n; i++) if(arr[i] > max) max = arr[i];\n    for(int exp = 1; max/exp > 0; exp *= 10) {\n        int* output = (int*)malloc(n*sizeof(int));\n        int count[10] = {0};\n        for(int i=0; i<n; i++) count[(arr[i]/exp)%10]++;\n        for(int i=1; i<10; i++) count[i] += count[i-1];\n        for(int i=n-1; i>=0; i--) { output[count[(arr[i]/exp)%10]-1] = arr[i]; count[(arr[i]/exp)%10]--; }\n        for(int i=0; i<n; i++) arr[i] = output[i];\n        free(output);\n    }\n}`
+  },
+  bucket: {
+    go: `func sort(arr []int) {\n    if len(arr) == 0 { return }\n    min, max := arr[0], arr[0]\n    for _, v := range arr { if v > max { max = v }; if v < min { min = v } }\n    bucketCount := len(arr)\n    buckets := make([][]int, bucketCount)\n    for _, v := range arr {\n        idx := (v - min) * (bucketCount - 1) / func() int { if max-min > 0 { return max - min }; return 1 }()\n        buckets[idx] = append(buckets[idx], v)\n    }\n    k := 0\n    for _, b := range buckets {\n        for i:=0; i<len(b)-1; i++ { for j:=i+1; j<len(b); j++ { if b[i]>b[j] { b[i], b[j] = b[j], b[i] } } }\n        for _, v := range b { arr[k] = v; k++ }\n    }\n}`,
+    python: `def sort(arr):\n    if not arr: return arr\n    mn, mx = min(arr), max(arr)\n    bucket_cnt = len(arr)\n    buckets = [[] for _ in range(bucket_cnt)]\n    for v in arr:\n        idx = (v - mn) * (bucket_cnt - 1) // max(1, mx - mn)\n        buckets[idx].append(v)\n    k = 0\n    for b in buckets:\n        b.sort()\n        for v in b: arr[k] = v; k += 1\n    return arr`,
+    java: `static void sort(int[] arr) {\n    if(arr.length == 0) return;\n    int min = arr[0], max = arr[0];\n    for (int v : arr) { if(v > max) max = v; if(v < min) min = v; }\n    int bucketCnt = arr.length;\n    java.util.List<Integer>[] buckets = new java.util.ArrayList[bucketCnt];\n    for(int i=0; i<bucketCnt; i++) buckets[i] = new java.util.ArrayList<>();\n    for (int v : arr) {\n        int idx = (v - min) * (bucketCnt - 1) / Math.max(1, max - min);\n        buckets[idx].add(v);\n    }\n    int k = 0;\n    for (java.util.List<Integer> b : buckets) {\n        java.util.Collections.sort(b);\n        for (int v : b) arr[k++] = v;\n    }\n}`,
+    c: `void sort(int arr[], int n) {\n    if (n == 0) return;\n    int max = arr[0], min = arr[0];\n    for(int i=1; i<n; i++) { if(arr[i]>max) max=arr[i]; if(arr[i]<min) min=arr[i]; }\n    int bucketCnt = n;\n    int** buckets = (int**)malloc(bucketCnt * sizeof(int*));\n    int* bucketSizes = (int*)calloc(bucketCnt, sizeof(int));\n    for(int i=0; i<bucketCnt; i++) buckets[i] = (int*)malloc(n * sizeof(int));\n    for(int i=0; i<n; i++) {\n        int div = max - min > 0 ? max - min : 1;\n        int idx = (arr[i] - min) * (bucketCnt - 1) / div;\n        buckets[idx][bucketSizes[idx]++] = arr[i];\n    }\n    int k = 0;\n    for(int i=0; i<bucketCnt; i++) {\n        for(int a=0; a<bucketSizes[i]-1; a++) { for(int b=a+1; b<bucketSizes[i]; b++) { if(buckets[i][a] > buckets[i][b]) { int t = buckets[i][a]; buckets[i][a] = buckets[i][b]; buckets[i][b] = t; } } }\n        for(int j=0; j<bucketSizes[i]; j++) arr[k++] = buckets[i][j];\n        free(buckets[i]);\n    }\n    free(buckets); free(bucketSizes);\n}`
+  },
+  pigeonhole: {
+    go: `func sort(arr []int) {\n    if len(arr) == 0 { return }\n    min, max := arr[0], arr[0]\n    for _, v := range arr { if v > max { max = v }; if v < min { min = v } }\n    holes := make([]int, max-min+1)\n    for _, v := range arr { holes[v-min]++ }\n    idx := 0\n    for i, count := range holes { for count > 0 { arr[idx] = i + min; idx++; count-- } }\n}`,
+    python: `def sort(arr):\n    if not arr: return arr\n    mn, mx = min(arr), max(arr)\n    holes = [0] * (mx - mn + 1)\n    for v in arr: holes[v - mn] += 1\n    idx = 0\n    for i, count in enumerate(holes):\n        while count > 0:\n            arr[idx] = i + mn\n            idx += 1; count -= 1\n    return arr`,
+    java: `static void sort(int[] arr) {\n    if(arr.length == 0) return;\n    int min = arr[0], max = arr[0];\n    for(int v : arr) { if(v > max) max = v; if(v < min) min = v; }\n    int[] holes = new int[max - min + 1];\n    for(int v : arr) holes[v - min]++;\n    int idx = 0;\n    for(int i=0; i<holes.length; i++) { while(holes[i]-- > 0) arr[idx++] = i + min; }\n}`,
+    c: `void sort(int arr[], int n) {\n    if (n == 0) return;\n    int min = arr[0], max = arr[0];\n    for(int i=1; i<n; i++) { if(arr[i] > max) max = arr[i]; if(arr[i] < min) min = arr[i]; }\n    int range = max - min + 1;\n    int* holes = (int*)calloc(range, sizeof(int));\n    for(int i=0; i<n; i++) holes[arr[i] - min]++;\n    int idx = 0;\n    for(int i=0; i<range; i++) { while(holes[i]-- > 0) arr[idx++] = i + min; }\n    free(holes);\n}`
+  },
+  bogo: {
+    go: `import "math/rand"\nfunc sort(arr []int) {\n    isSorted := func() bool {\n        for i:=1; i<len(arr); i++ { if arr[i-1]>arr[i] { return false } }\n        return true\n    }\n    for !isSorted() {\n        rand.Shuffle(len(arr), func(i, j int) { arr[i], arr[j] = arr[j], arr[i] })\n    }\n}`,
+    python: `import random\ndef sort(arr):\n    while any(arr[i] > arr[i+1] for i in range(len(arr)-1)):\n        random.shuffle(arr)\n    return arr`,
+    java: `static void sort(int[] arr) {\n    java.util.Random rand = new java.util.Random();\n    while (true) {\n        boolean sorted = true;\n        for (int i=1; i<arr.length; i++) if (arr[i-1] > arr[i]) { sorted = false; break; }\n        if (sorted) break;\n        for (int i=arr.length-1; i>0; i--) {\n            int j = rand.nextInt(i + 1);\n            int t = arr[i]; arr[i] = arr[j]; arr[j] = t;\n        }\n    }\n}`,
+    c: `void sort(int arr[], int n) {\n    while (1) {\n        int sorted = 1;\n        for (int i=1; i<n; i++) if (arr[i-1] > arr[i]) { sorted = 0; break; }\n        if (sorted) break;\n        for (int i=n-1; i>0; i--) {\n            int j = rand() % (i + 1);\n            int t = arr[i]; arr[i] = arr[j]; arr[j] = t;\n        }\n    }\n}`
+  }
+};
+
+function renderContent() {
+    const k = vizState.key || 'bubble';
+    const lang = currentLang;
+    const algoName = BYKEY[k]?.name || 'Algorithm';
+    const arrString = document.getElementById('code-input-arr').value.trim();
+    
+    if (lang === 'concept') {
+        conceptWrapper.innerHTML = CONCEPTS[k] || `
+            <div class="concept-title">${algoName} - Conceptual Logic</div>
+            <p>Select another algorithm to see a detailed step-by-step conceptual breakdown.</p>
+        `;
+        return;
+    }
+
+    const logicSnippet = CODES[k]?.[lang] || `// Full implementation of ${algoName} coming soon.`;
+    
+    let fullCode = "";
+    if(lang==='go'){
+        let snip = logicSnippet;
+        let imports = `"fmt"`;
+        if (snip.includes(`import "math/rand"`)) {
+            imports = `"fmt"\n    "math/rand"`;
+            snip = snip.replace(`import "math/rand"\n`, ``);
+        }
+        fullCode = `package main\n\nimport (\n    ${imports}\n)\n\n${snip}\n\nfunc main() {\n    arr := []int{${arrString}}\n    sort(arr)\n    fmt.Println(arr)\n}`;
+    } else if(lang==='python'){
+        fullCode = `${logicSnippet}\n\nif __name__ == "__main__":\n    arr = [${arrString}]\n    arr = sort(arr)\n    print(arr)`;
+    } else if(lang==='java'){
+        const paddedSnip = logicSnippet.split('\n').map((line, index) => index === 0 ? line : `    ${line}`).join('\n');
+        fullCode = `import java.util.Arrays;\n\npublic class SortMain {\n    ${paddedSnip}\n\n    public static void main(String[] args) {\n        int[] arr = {${arrString}};\n        sort(arr);\n        System.out.println(Arrays.toString(arr));\n    }\n}`;
+    } else if(lang==='c'){
+        fullCode = `#include <stdio.h>\n#include <stdlib.h>\n\n${logicSnippet}\n\nint main() {\n    int arr[] = {${arrString}};\n    int n = sizeof(arr) / sizeof(arr[0]);\n    sort(arr, n);\n    for(int i = 0; i < n; i++) printf("%d ", arr[i]);\n    printf("\\n");\n    return 0;\n}`;
+    }
+    
+    document.getElementById('code-block').textContent = fullCode;
 }
 
 /* ============================================================
