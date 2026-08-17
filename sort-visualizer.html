@@ -1,0 +1,1016 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SORT// a realtime sorting visualizer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0a0e13;
+    --panel:#10161d;
+    --panel2:#141c24;
+    --line:#1e2a35;
+    --line-soft:#161f28;
+    --text:#dbe6ee;
+    --muted:#5f7484;
+    --muted2:#3c4c58;
+    --amber:#ffb454;
+    --cyan:#5ce1ff;
+    --mint:#6ee7a8;
+    --coral:#ff6b6b;
+    --bar:#26404f;
+    --bar2:#2f5163;
+    --radius:2px;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{height:100%;}
+  body{
+    background:
+      linear-gradient(var(--bg), var(--bg)) ,
+      repeating-linear-gradient(0deg, rgba(94,225,255,0.025) 0px, rgba(94,225,255,0.025) 1px, transparent 1px, transparent 40px),
+      repeating-linear-gradient(90deg, rgba(94,225,255,0.025) 0px, rgba(94,225,255,0.025) 1px, transparent 1px, transparent 40px);
+    color:var(--text);
+    font-family:'Space Grotesk', sans-serif;
+    min-height:100%;
+    padding-bottom:60px;
+  }
+  .mono{font-family:'JetBrains Mono', monospace;}
+
+  header{
+    border-bottom:1px solid var(--line);
+    padding:22px 28px;
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    flex-wrap:wrap;
+    gap:10px;
+    position:sticky; top:0; z-index:50;
+    background:rgba(10,14,19,0.92);
+    backdrop-filter:blur(6px);
+  }
+  .logo{
+    font-family:'JetBrains Mono', monospace;
+    font-size:19px;
+    font-weight:700;
+    letter-spacing:0.5px;
+    color:var(--text);
+  }
+  .logo span{color:var(--amber);}
+  .logo .cursor{
+    display:inline-block; width:9px; height:16px; background:var(--cyan);
+    margin-left:2px; vertical-align:-2px;
+    animation:blink 1.1s steps(1) infinite;
+  }
+  @keyframes blink{0%,49%{opacity:1;}50%,100%{opacity:0;}}
+  nav{display:flex; gap:4px; font-family:'JetBrains Mono',monospace; font-size:12.5px;}
+  nav button{
+    background:transparent; border:1px solid var(--line); color:var(--muted);
+    padding:8px 14px; cursor:pointer; letter-spacing:0.5px; border-radius:var(--radius);
+    transition:all .15s;
+  }
+  nav button.active{color:var(--bg); background:var(--cyan); border-color:var(--cyan); font-weight:600;}
+  nav button:hover:not(.active){color:var(--text); border-color:var(--muted2);}
+
+  main{max-width:1280px; margin:0 auto; padding:36px 28px;}
+
+  .intro{margin-bottom:32px;}
+  .eyebrow{
+    font-family:'JetBrains Mono',monospace; font-size:11.5px; color:var(--cyan);
+    letter-spacing:2px; text-transform:uppercase; margin-bottom:10px;
+  }
+  h1{font-size:34px; font-weight:700; line-height:1.15; max-width:760px; letter-spacing:-0.5px;}
+  .intro p{color:var(--muted); max-width:600px; margin-top:12px; font-size:14.5px; line-height:1.6;}
+
+  .compare-cta{
+    margin-top:22px; display:flex; align-items:center; gap:14px; padding:16px 18px;
+    border:1px solid var(--line); background:var(--panel); border-radius:var(--radius);
+  }
+  .compare-cta .txt{flex:1; font-size:13.5px; color:var(--muted);}
+  .compare-cta .txt b{color:var(--text); font-weight:600;}
+  .btn{
+    font-family:'JetBrains Mono',monospace; font-size:12.5px; font-weight:600;
+    background:var(--amber); color:#1a1204; border:none; padding:11px 18px;
+    cursor:pointer; letter-spacing:0.4px; border-radius:var(--radius); white-space:nowrap;
+    transition:transform .1s, filter .15s;
+  }
+  .btn:hover{filter:brightness(1.08);}
+  .btn:active{transform:translateY(1px);}
+  .btn.ghost{background:transparent; border:1px solid var(--line); color:var(--text);}
+  .btn.ghost:hover{border-color:var(--muted2);}
+  .btn:disabled{opacity:0.35; cursor:not-allowed; filter:none;}
+  .btn.cyan{background:var(--cyan); color:#04212b;}
+  .btn.mint{background:var(--mint); color:#062615;}
+  .btn.coral{background:var(--coral); color:#2b0a0a;}
+
+  .cat-label{
+    font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--muted); letter-spacing:2px;
+    text-transform:uppercase; margin:30px 0 12px; display:flex; align-items:center; gap:10px;
+  }
+  .cat-label::after{content:''; flex:1; height:1px; background:var(--line);}
+
+  .grid{
+    display:grid; grid-template-columns:repeat(auto-fill, minmax(230px,1fr)); gap:12px;
+  }
+  .card{
+    border:1px solid var(--line); background:var(--panel); border-radius:var(--radius);
+    padding:16px; cursor:pointer; transition:border-color .15s, background .15s, transform .1s;
+    position:relative; overflow:hidden;
+  }
+  .card:hover{border-color:var(--cyan); background:var(--panel2);}
+  .card:active{transform:scale(0.99);}
+  .card .idx{
+    font-family:'JetBrains Mono',monospace; font-size:10.5px; color:var(--muted2); letter-spacing:1px;
+  }
+  .card h3{font-size:16px; margin:6px 0 8px; font-weight:600;}
+  .card .bigo{
+    display:flex; gap:6px; font-family:'JetBrains Mono',monospace; font-size:10.5px; flex-wrap:wrap;
+  }
+  .badge{
+    border:1px solid var(--line-soft); padding:3px 7px; border-radius:2px; color:var(--muted);
+  }
+  .badge.worst{color:var(--coral); border-color:rgba(255,107,107,0.25);}
+  .badge.best{color:var(--mint); border-color:rgba(110,231,168,0.25);}
+
+  .toolbar{
+    display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+    border:1px solid var(--line); background:var(--panel); border-radius:var(--radius);
+    padding:14px 16px; margin-bottom:18px;
+  }
+  .toolbar .back{color:var(--muted); cursor:pointer; font-family:'JetBrains Mono',monospace; font-size:12.5px; padding-right:6px; border-right:1px solid var(--line); margin-right:4px;}
+  .toolbar .back:hover{color:var(--text);}
+  .toolbar .title{font-weight:600; font-size:15px; margin-right:auto;}
+  .toolbar .title .tag{color:var(--muted); font-weight:400; font-family:'JetBrains Mono',monospace; font-size:11.5px; margin-left:8px;}
+  .field{display:flex; align-items:center; gap:7px; font-family:'JetBrains Mono',monospace; font-size:11.5px; color:var(--muted);}
+  .field select, .field input[type=range]{accent-color:var(--cyan);}
+  select{
+    background:var(--panel2); color:var(--text); border:1px solid var(--line); border-radius:2px;
+    font-family:'JetBrains Mono',monospace; font-size:12px; padding:6px 8px;
+  }
+
+  .stage{
+    border:1px solid var(--line); background:var(--panel); border-radius:var(--radius);
+    padding:18px; margin-bottom:18px;
+  }
+  canvas{display:block; width:100%; height:340px;}
+
+  .stats{
+    display:grid; grid-template-columns:repeat(auto-fit, minmax(140px,1fr)); gap:1px;
+    background:var(--line); border:1px solid var(--line); border-radius:var(--radius); overflow:hidden;
+  }
+  .stat{background:var(--panel); padding:14px 16px;}
+  .stat .l{font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--muted); letter-spacing:1.5px; text-transform:uppercase;}
+  .stat .v{font-family:'JetBrains Mono',monospace; font-size:20px; margin-top:5px; color:var(--text); font-weight:600;}
+  .stat .v.worst{color:var(--coral);}
+  .stat .v.best{color:var(--mint);}
+  .stat .v.time{color:var(--amber);}
+
+  .legend{display:flex; gap:16px; margin-top:14px; font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--muted); flex-wrap:wrap; align-items:center;}
+  .legend span{display:inline-flex; align-items:center; gap:6px;}
+  .dot{width:9px; height:9px; border-radius:1px; display:inline-block;}
+  .statuspill{
+    margin-left:auto; padding:3px 9px; border-radius:2px; border:1px solid var(--line-soft); color:var(--muted);
+  }
+  .statuspill.done{color:var(--mint); border-color:rgba(110,231,168,0.3);}
+  .statuspill.playing{color:var(--amber); border-color:rgba(255,180,84,0.3);}
+
+  .cmp-top{
+    display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:18px;
+    border:1px solid var(--line); background:var(--panel); border-radius:var(--radius); padding:14px 16px;
+  }
+  .cmp-top .title{font-weight:600; font-size:15px; margin-right:auto;}
+  .cmp-top .note{font-family:'JetBrains Mono',monospace; font-size:10.5px; color:var(--muted2); width:100%; order:99;}
+  .cmpgrid{
+    display:grid; grid-template-columns:repeat(auto-fill, minmax(260px,1fr)); gap:12px;
+  }
+  .cmpcard{
+    border:1px solid var(--line); background:var(--panel); border-radius:var(--radius); padding:12px; position:relative;
+  }
+  .cmpcard.done{border-color:rgba(110,231,168,0.4);}
+  .cmpcard .h{display:flex; justify-content:space-between; align-items:baseline; margin-bottom:8px;}
+  .cmpcard .h .nm{font-size:13px; font-weight:600;}
+  .cmpcard .h .rank{
+    font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--bg); background:var(--muted2);
+    padding:2px 6px; border-radius:2px; opacity:0;
+  }
+  .cmpcard.done .rank{opacity:1; background:var(--mint); color:#062615;}
+  .cmpcard canvas{height:90px; width:100%;}
+  .cmpcard .foot{display:flex; justify-content:space-between; margin-top:8px; font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--muted);}
+  .cmpcard .foot .t{color:var(--amber); font-weight:600;}
+  .cmpcard.done .foot .t{color:var(--mint);}
+
+  .view{display:none;}
+  .view.active{display:block;}
+
+  footer{
+    max-width:1280px; margin:40px auto 0; padding:20px 28px; color:var(--muted2);
+    font-family:'JetBrains Mono',monospace; font-size:11px; border-top:1px solid var(--line);
+    display:flex; justify-content:space-between; flex-wrap:wrap; gap:6px;
+  }
+  footer .credit{color:var(--muted); letter-spacing:0.5px;}
+  footer .credit b{color:var(--cyan); font-weight:600;}
+
+  @media (max-width:600px){
+    h1{font-size:26px;}
+    .toolbar .title{width:100%; order:-1;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">SORT<span>//</span>VIZ<span class="cursor"></span></div>
+  <nav>
+    <button id="nav-select" class="active">01 choose</button>
+    <button id="nav-compare">02 compare all</button>
+  </nav>
+</header>
+
+<main>
+
+  <!-- ============ VIEW 1: SELECT ============ -->
+  <section id="view-select" class="view active">
+    <div class="intro">
+      <div class="eyebrow">18 algorithms · realtime canvas render</div>
+      <h1>Pick an algorithm. Watch it think.</h1>
+      <p>Every bar is a value in memory. Amber = comparing, cyan = writing, mint = sorted. Pick one below to visualize it step by step, or run every algorithm at once and see who actually finishes first.</p>
+      <div class="compare-cta">
+        <div class="txt"><b>Compare All mode</b> — every algorithm sorts the same array simultaneously. Real computed time, not animation time. (Bogo Sort is excluded — it would never finish.)</div>
+        <button class="btn cyan" id="cta-compare">Run all 17 →</button>
+      </div>
+    </div>
+
+    <div class="cat-label">comparison · O(n²) class</div>
+    <div class="grid" id="grid-simple"></div>
+
+    <div class="cat-label">comparison · efficient / hybrid</div>
+    <div class="grid" id="grid-efficient"></div>
+
+    <div class="cat-label">non-comparison · linear time</div>
+    <div class="grid" id="grid-linear"></div>
+
+    <div class="cat-label">for the memes</div>
+    <div class="grid" id="grid-meme"></div>
+  </section>
+
+  <!-- ============ VIEW 2: VISUALIZE ============ -->
+  <section id="view-viz" class="view">
+    <div class="toolbar">
+      <span class="back" id="viz-back">← back</span>
+      <div class="title" id="viz-title">—<span class="tag" id="viz-tag"></span></div>
+      <div class="field">size
+        <select id="viz-size">
+          <option value="8">8</option>
+          <option value="16" selected>16</option>
+          <option value="32">32</option>
+          <option value="64">64</option>
+          <option value="128">128</option>
+          <option value="256">256</option>
+          <option value="500">500</option>
+          <option value="1000">1000</option>
+        </select>
+      </div>
+      <div class="field">speed
+        <input type="range" id="viz-speed" min="1" max="100" value="60">
+      </div>
+      <button class="btn ghost" id="viz-shuffle">↻ new array</button>
+      <button class="btn coral" id="viz-end" disabled>⏭ end</button>
+      <button class="btn" id="viz-sort">▶ sort</button>
+    </div>
+
+    <div class="stage">
+      <canvas id="viz-canvas"></canvas>
+      <div class="legend">
+        <span><i class="dot" style="background:var(--bar2)"></i>unsorted</span>
+        <span><i class="dot" style="background:var(--amber)"></i>comparing</span>
+        <span><i class="dot" style="background:var(--cyan)"></i>writing</span>
+        <span><i class="dot" style="background:var(--mint)"></i>sorted</span>
+        <span class="statuspill" id="viz-status">idle</span>
+      </div>
+    </div>
+
+    <div class="stats">
+      <div class="stat"><div class="l">best case</div><div class="v best" id="stat-best">—</div></div>
+      <div class="stat"><div class="l">average case</div><div class="v" id="stat-avg">—</div></div>
+      <div class="stat"><div class="l">worst case</div><div class="v worst" id="stat-worst">—</div></div>
+      <div class="stat"><div class="l">space</div><div class="v" id="stat-space">—</div></div>
+      <div class="stat"><div class="l">comparisons</div><div class="v" id="stat-comp">0</div></div>
+      <div class="stat"><div class="l">writes</div><div class="v" id="stat-writes">0</div></div>
+      <div class="stat"><div class="l">time taken</div><div class="v time" id="stat-time">—</div></div>
+    </div>
+  </section>
+
+  <!-- ============ VIEW 3: COMPARE ALL ============ -->
+  <section id="view-cmp" class="view">
+    <div class="cmp-top">
+      <div class="title">Compare all 17 algorithms</div>
+      <div class="field">size
+        <select id="cmp-size">
+          <option value="16">16</option>
+          <option value="32" selected>32</option>
+          <option value="64">64</option>
+          <option value="128">128</option>
+          <option value="256">256</option>
+          <option value="500">500</option>
+          <option value="1000">1000</option>
+        </select>
+      </div>
+      <button class="btn ghost" id="cmp-shuffle">↻ new array</button>
+      <button class="btn mint" id="cmp-play">▶ play all</button>
+      <div class="note">Bogo Sort is excluded from Compare All — it isn't guaranteed to ever finish.</div>
+    </div>
+    <div class="cmpgrid" id="cmpgrid"></div>
+  </section>
+
+</main>
+
+<footer>
+  <span>sortviz — bubble to bitonic, rendered on &lt;canvas&gt;, zero dependencies.</span>
+  <span class="credit">made by <b>demon-bruv</b></span>
+</footer>
+
+<script>
+/* ============================================================
+   ALGORITHM METADATA
+   ============================================================ */
+const ALGOS = [
+  {key:'bubble', name:'Bubble Sort', cat:'simple', best:'O(n)', avg:'O(n²)', worst:'O(n²)', space:'O(1)'},
+  {key:'selection', name:'Selection Sort', cat:'simple', best:'O(n²)', avg:'O(n²)', worst:'O(n²)', space:'O(1)'},
+  {key:'insertion', name:'Insertion Sort', cat:'simple', best:'O(n)', avg:'O(n²)', worst:'O(n²)', space:'O(1)'},
+  {key:'gnome', name:'Gnome Sort', cat:'simple', best:'O(n)', avg:'O(n²)', worst:'O(n²)', space:'O(1)'},
+  {key:'cocktail', name:'Cocktail Shaker', cat:'simple', best:'O(n)', avg:'O(n²)', worst:'O(n²)', space:'O(1)'},
+  {key:'comb', name:'Comb Sort', cat:'simple', best:'O(n log n)', avg:'O(n²/2ᵖ)', worst:'O(n²)', space:'O(1)'},
+
+  {key:'shell', name:'Shell Sort', cat:'efficient', best:'O(n log n)', avg:'O(n^1.3)', worst:'O(n²)', space:'O(1)'},
+  {key:'merge', name:'Merge Sort', cat:'efficient', best:'O(n log n)', avg:'O(n log n)', worst:'O(n log n)', space:'O(n)'},
+  {key:'quick', name:'Quick Sort', cat:'efficient', best:'O(n log n)', avg:'O(n log n)', worst:'O(n²)', space:'O(log n)'},
+  {key:'heap', name:'Heap Sort', cat:'efficient', best:'O(n log n)', avg:'O(n log n)', worst:'O(n log n)', space:'O(1)'},
+  {key:'tree', name:'Tree Sort', cat:'efficient', best:'O(n log n)', avg:'O(n log n)', worst:'O(n²)', space:'O(n)'},
+  {key:'cycle', name:'Cycle Sort', cat:'efficient', best:'O(n²)', avg:'O(n²)', worst:'O(n²)', space:'O(1)'},
+  {key:'bitonic', name:'Bitonic Sort', cat:'efficient', best:'O(n log²n)', avg:'O(n log²n)', worst:'O(n log²n)', space:'O(n log n)'},
+
+  {key:'counting', name:'Counting Sort', cat:'linear', best:'O(n+k)', avg:'O(n+k)', worst:'O(n+k)', space:'O(n+k)'},
+  {key:'radix', name:'Radix Sort', cat:'linear', best:'O(nk)', avg:'O(nk)', worst:'O(nk)', space:'O(n+k)'},
+  {key:'bucket', name:'Bucket Sort', cat:'linear', best:'O(n+k)', avg:'O(n+k)', worst:'O(n²)', space:'O(n)'},
+  {key:'pigeonhole', name:'Pigeonhole Sort', cat:'linear', best:'O(n+range)', avg:'O(n+range)', worst:'O(n+range)', space:'O(range)'},
+
+  {key:'bogo', name:'Bogo Sort', cat:'meme', best:'O(n)', avg:'O(n·n!)', worst:'O(∞)', space:'O(1)'},
+];
+const CATMAP = {simple:'grid-simple', efficient:'grid-efficient', linear:'grid-linear', meme:'grid-meme'};
+const BYKEY = Object.fromEntries(ALGOS.map(a=>[a.key,a]));
+const COMPARE_ALGOS = ALGOS.filter(a=>a.key!=='bogo');
+
+/* ============================================================
+   SORT GENERATORS
+   diff-based steps: {active:[indices], type:'compare'|'write'|'done', vals:[...]}
+   'vals' (only present on 'write') are the NEW values at the matching 'active' indices.
+   bogo sort is the one exception — it yields a full array snapshot via 'arr'
+   because a full shuffle touches every index at once.
+   ============================================================ */
+const GEN = {};
+
+GEN.bubble = function*(a){
+  let n=a.length;
+  for(let i=0;i<n-1;i++){
+    let swapped=false;
+    for(let j=0;j<n-i-1;j++){
+      yield {active:[j,j+1], type:'compare'};
+      if(a[j]>a[j+1]){[a[j],a[j+1]]=[a[j+1],a[j]]; swapped=true; yield {active:[j,j+1], type:'write', vals:[a[j],a[j+1]]};}
+    }
+    if(!swapped) break;
+  }
+  yield {active:[], type:'done'};
+};
+
+GEN.selection = function*(a){
+  let n=a.length;
+  for(let i=0;i<n-1;i++){
+    let min=i;
+    for(let j=i+1;j<n;j++){
+      yield {active:[min,j], type:'compare'};
+      if(a[j]<a[min]) min=j;
+    }
+    if(min!==i){[a[i],a[min]]=[a[min],a[i]]; yield {active:[i,min], type:'write', vals:[a[i],a[min]]};}
+  }
+  yield {active:[], type:'done'};
+};
+
+GEN.insertion = function*(a){
+  let n=a.length;
+  for(let i=1;i<n;i++){
+    let key=a[i], j=i-1;
+    while(j>=0 && a[j]>key){
+      yield {active:[j,j+1], type:'compare'};
+      a[j+1]=a[j];
+      yield {active:[j+1], type:'write', vals:[a[j+1]]};
+      j--;
+    }
+    a[j+1]=key;
+    yield {active:[j+1], type:'write', vals:[a[j+1]]};
+  }
+  yield {active:[], type:'done'};
+};
+
+GEN.gnome = function*(a){
+  let n=a.length, i=0;
+  while(i<n){
+    if(i===0){i++; continue;}
+    yield {active:[i-1,i], type:'compare'};
+    if(a[i-1]<=a[i]) i++;
+    else {[a[i-1],a[i]]=[a[i],a[i-1]]; yield {active:[i-1,i], type:'write', vals:[a[i-1],a[i]]}; i--;}
+  }
+  yield {active:[], type:'done'};
+};
+
+GEN.cocktail = function*(a){
+  let n=a.length, start=0, end=n-1, swapped=true;
+  while(swapped){
+    swapped=false;
+    for(let i=start;i<end;i++){
+      yield {active:[i,i+1], type:'compare'};
+      if(a[i]>a[i+1]){[a[i],a[i+1]]=[a[i+1],a[i]]; swapped=true; yield {active:[i,i+1], type:'write', vals:[a[i],a[i+1]]};}
+    }
+    if(!swapped) break;
+    swapped=false; end--;
+    for(let i=end-1;i>=start;i--){
+      yield {active:[i,i+1], type:'compare'};
+      if(a[i]>a[i+1]){[a[i],a[i+1]]=[a[i+1],a[i]]; swapped=true; yield {active:[i,i+1], type:'write', vals:[a[i],a[i+1]]};}
+    }
+    start++;
+  }
+  yield {active:[], type:'done'};
+};
+
+GEN.comb = function*(a){
+  let n=a.length, gap=n, shrink=1.3, swapped=true;
+  while(gap>1 || swapped){
+    gap=Math.floor(gap/shrink); if(gap<1) gap=1;
+    swapped=false;
+    for(let i=0;i+gap<n;i++){
+      yield {active:[i,i+gap], type:'compare'};
+      if(a[i]>a[i+gap]){[a[i],a[i+gap]]=[a[i+gap],a[i]]; swapped=true; yield {active:[i,i+gap], type:'write', vals:[a[i],a[i+gap]]};}
+    }
+  }
+  yield {active:[], type:'done'};
+};
+
+GEN.shell = function*(a){
+  let n=a.length;
+  for(let gap=Math.floor(n/2); gap>0; gap=Math.floor(gap/2)){
+    for(let i=gap;i<n;i++){
+      let temp=a[i], j=i;
+      while(j>=gap){
+        yield {active:[j-gap,j], type:'compare'};
+        if(a[j-gap]>temp){a[j]=a[j-gap]; yield {active:[j], type:'write', vals:[a[j]]}; j-=gap;}
+        else break;
+      }
+      a[j]=temp;
+      yield {active:[j], type:'write', vals:[a[j]]};
+    }
+  }
+  yield {active:[], type:'done'};
+};
+
+GEN.merge = function*(a){
+  function* msort(lo,hi){
+    if(hi-lo<=1) return;
+    let mid=(lo+hi)>>1;
+    yield* msort(lo,mid);
+    yield* msort(mid,hi);
+    let left=a.slice(lo,mid), right=a.slice(mid,hi);
+    let i=0,j=0,k=lo;
+    while(i<left.length && j<right.length){
+      yield {active:[k], type:'compare'};
+      if(left[i]<=right[j]){a[k]=left[i]; i++;} else {a[k]=right[j]; j++;}
+      yield {active:[k], type:'write', vals:[a[k]]};
+      k++;
+    }
+    while(i<left.length){a[k]=left[i]; yield {active:[k], type:'write', vals:[a[k]]}; i++; k++;}
+    while(j<right.length){a[k]=right[j]; yield {active:[k], type:'write', vals:[a[k]]}; j++; k++;}
+  }
+  yield* msort(0,a.length);
+  yield {active:[], type:'done'};
+};
+
+GEN.quick = function*(a){
+  function* qs(lo,hi){
+    if(lo>=hi) return;
+    let pivot=a[hi], i=lo-1;
+    for(let j=lo;j<hi;j++){
+      yield {active:[j,hi], type:'compare'};
+      if(a[j]<pivot){i++; [a[i],a[j]]=[a[j],a[i]]; yield {active:[i,j], type:'write', vals:[a[i],a[j]]};}
+    }
+    [a[i+1],a[hi]]=[a[hi],a[i+1]];
+    yield {active:[i+1,hi], type:'write', vals:[a[i+1],a[hi]]};
+    yield* qs(lo,i);
+    yield* qs(i+2,hi);
+  }
+  yield* qs(0,a.length-1);
+  yield {active:[], type:'done'};
+};
+
+GEN.heap = function*(a){
+  let n=a.length;
+  function* heapify(size,i){
+    let largest=i, l=2*i+1, r=2*i+2;
+    if(l<size){yield {active:[largest,l], type:'compare'}; if(a[l]>a[largest]) largest=l;}
+    if(r<size){yield {active:[largest,r], type:'compare'}; if(a[r]>a[largest]) largest=r;}
+    if(largest!==i){[a[i],a[largest]]=[a[largest],a[i]]; yield {active:[i,largest], type:'write', vals:[a[i],a[largest]]}; yield* heapify(size,largest);}
+  }
+  for(let i=Math.floor(n/2)-1;i>=0;i--) yield* heapify(n,i);
+  for(let i=n-1;i>0;i--){
+    [a[0],a[i]]=[a[i],a[0]];
+    yield {active:[0,i], type:'write', vals:[a[0],a[i]]};
+    yield* heapify(i,0);
+  }
+  yield {active:[], type:'done'};
+};
+
+GEN.tree = function*(a){
+  class Node{constructor(v){this.v=v; this.l=null; this.r=null;}}
+  let root=null;
+  function insert(node,v){
+    if(!node) return new Node(v);
+    if(v<node.v) node.l=insert(node.l,v); else node.r=insert(node.r,v);
+    return node;
+  }
+  for(const v of a) root=insert(root,v);
+  let idx=0;
+  function* inorder(node){
+    if(!node) return;
+    yield* inorder(node.l);
+    a[idx]=node.v;
+    yield {active:[idx], type:'write', vals:[a[idx]]};
+    idx++;
+    yield* inorder(node.r);
+  }
+  yield* inorder(root);
+  yield {active:[], type:'done'};
+};
+
+GEN.cycle = function*(a){
+  let n=a.length;
+  for(let cs=0;cs<n-1;cs++){
+    let item=a[cs], pos=cs;
+    for(let i=cs+1;i<n;i++){yield {active:[cs,i], type:'compare'}; if(a[i]<item) pos++;}
+    if(pos===cs) continue;
+    while(item===a[pos]) pos++;
+    [item,a[pos]]=[a[pos],item];
+    yield {active:[pos], type:'write', vals:[a[pos]]};
+    while(pos!==cs){
+      pos=cs;
+      for(let i=cs+1;i<n;i++){yield {active:[cs,i], type:'compare'}; if(a[i]<item) pos++;}
+      while(item===a[pos]) pos++;
+      [item,a[pos]]=[a[pos],item];
+      yield {active:[pos], type:'write', vals:[a[pos]]};
+    }
+  }
+  yield {active:[], type:'done'};
+};
+
+GEN.bitonic = function*(a){
+  // requires power-of-2 length; caller guarantees this
+  let n=a.length;
+  function* cs(i,j,dir){
+    yield {active:[i,j], type:'compare'};
+    if((dir===1 && a[i]>a[j]) || (dir===0 && a[i]<a[j])){
+      [a[i],a[j]]=[a[j],a[i]];
+      yield {active:[i,j], type:'write', vals:[a[i],a[j]]};
+    }
+  }
+  function* merge(lo,cnt,dir){
+    if(cnt>1){
+      let k=Math.floor(cnt/2);
+      for(let i=lo;i<lo+k;i++) yield* cs(i,i+k,dir);
+      yield* merge(lo,k,dir);
+      yield* merge(lo+k,k,dir);
+    }
+  }
+  function* sortRec(lo,cnt,dir){
+    if(cnt>1){
+      let k=Math.floor(cnt/2);
+      yield* sortRec(lo,k,1);
+      yield* sortRec(lo+k,k,0);
+      yield* merge(lo,cnt,dir);
+    }
+  }
+  yield* sortRec(0,n,1);
+  yield {active:[], type:'done'};
+};
+
+GEN.counting = function*(a){
+  let n=a.length;
+  let max=Math.max(...a), min=Math.min(...a);
+  let range=max-min+1;
+  let count=new Array(range).fill(0);
+  for(let i=0;i<n;i++){count[a[i]-min]++; yield {active:[i], type:'compare'};}
+  let idx=0;
+  for(let v=0;v<range;v++){
+    while(count[v]>0){a[idx]=v+min; yield {active:[idx], type:'write', vals:[a[idx]]}; idx++; count[v]--;}
+  }
+  yield {active:[], type:'done'};
+};
+
+GEN.radix = function*(a){
+  let n=a.length;
+  let max=Math.max(...a);
+  for(let exp=1; Math.floor(max/exp)>0; exp*=10){
+    let output=new Array(n).fill(0), count=new Array(10).fill(0);
+    for(let i=0;i<n;i++){count[Math.floor(a[i]/exp)%10]++; yield {active:[i], type:'compare'};}
+    for(let i=1;i<10;i++) count[i]+=count[i-1];
+    for(let i=n-1;i>=0;i--){let d=Math.floor(a[i]/exp)%10; output[count[d]-1]=a[i]; count[d]--;}
+    for(let i=0;i<n;i++){a[i]=output[i]; yield {active:[i], type:'write', vals:[a[i]]};}
+  }
+  yield {active:[], type:'done'};
+};
+
+GEN.bucket = function*(a){
+  let n=a.length;
+  let max=Math.max(...a), min=Math.min(...a);
+  let bucketCount=n;
+  let buckets=Array.from({length:bucketCount},()=>[]);
+  for(let i=0;i<n;i++){
+    let idx=Math.min(bucketCount-1, Math.floor(((a[i]-min)/(max-min+1))*bucketCount));
+    buckets[idx].push(a[i]);
+    yield {active:[i], type:'compare'};
+  }
+  let k=0;
+  for(let b=0;b<bucketCount;b++){
+    buckets[b].sort((x,y)=>x-y);
+    for(const v of buckets[b]){a[k]=v; yield {active:[k], type:'write', vals:[a[k]]}; k++;}
+  }
+  yield {active:[], type:'done'};
+};
+
+GEN.pigeonhole = function*(a){
+  let n=a.length;
+  let max=Math.max(...a), min=Math.min(...a);
+  let size=max-min+1;
+  let holes=new Array(size).fill(0);
+  for(let i=0;i<n;i++){holes[a[i]-min]++; yield {active:[i], type:'compare'};}
+  let idx=0;
+  for(let i=0;i<size;i++){
+    while(holes[i]-->0){a[idx]=i+min; yield {active:[idx], type:'write', vals:[a[idx]]}; idx++;}
+  }
+  yield {active:[], type:'done'};
+};
+
+// bogo sort: full shuffle every attempt, so it yields a full snapshot instead of a diff.
+GEN.bogo = function*(a, cap=4000){
+  function isSorted(){for(let i=1;i<a.length;i++) if(a[i-1]>a[i]) return false; return true;}
+  function shuffle(){for(let i=a.length-1;i>0;i--){let j=(Math.random()*(i+1))|0; [a[i],a[j]]=[a[j],a[i]];}}
+  let attempts=0;
+  while(!isSorted() && attempts<cap){shuffle(); attempts++; yield {active:[], type:'compare', arr:a.slice()};}
+  if(!isSorted()){a.sort((x,y)=>x-y); yield {active:[], type:'write', arr:a.slice()};}
+  yield {active:[], type:'done'};
+};
+
+/* ============================================================
+   HELPERS
+   ============================================================ */
+function randomArray(n){
+  const vals=[];
+  for(let i=0;i<n;i++) vals.push(4+Math.floor(Math.random()*96));
+  return vals;
+}
+function nextPow2(n){let p=1; while(p<n) p*=2; return p;}
+
+// drains a generator fully, measuring real compute time + counting steps.
+// returns compact trace (no full-array copies except bogo) plus the final sorted array.
+function buildTrace(key, arr){
+  const work = arr.slice();
+  const gen = key==='bogo' ? GEN.bogo(work, 4000) : GEN[key](work);
+  const t0 = performance.now();
+  const trace = [];
+  let comparisons=0, writes=0;
+  for(const step of gen){
+    trace.push(step);
+    if(step.type==='compare') comparisons++;
+    if(step.type==='write') writes++;
+  }
+  const t1 = performance.now();
+  return {trace, timeMs:(t1-t0), comparisons, writes, finalArr:work};
+}
+
+function fmtTime(ms){
+  if(ms<1) return (ms*1000).toFixed(0)+' μs';
+  if(ms<1000) return ms.toFixed(2)+' ms';
+  return (ms/1000).toFixed(2)+' s';
+}
+
+function applyStep(mirror, step){
+  if(step.arr){
+    for(let i=0;i<step.arr.length;i++) mirror[i]=step.arr[i];
+    return;
+  }
+  if(step.type==='write' && step.vals){
+    step.active.forEach((idx,k)=>{ mirror[idx]=step.vals[k]; });
+  }
+}
+
+/* ============================================================
+   CANVAS RENDERING
+   ============================================================ */
+function drawBars(canvas, arr, active, type, maxVal, doneAll){
+  const dpr = window.devicePixelRatio||1;
+  const rect = canvas.getBoundingClientRect();
+  if(canvas._w!==rect.width || canvas._h!==rect.height){
+    canvas.width = rect.width*dpr;
+    canvas.height = rect.height*dpr;
+    canvas._w=rect.width; canvas._h=rect.height;
+  }
+  const ctx = canvas.getContext('2d');
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  const W=rect.width, H=rect.height;
+  ctx.clearRect(0,0,W,H);
+  const n=arr.length;
+  const gap = n>128 ? 0 : (n>64 ? 1 : 2);
+  const barW = Math.max(0.6,(W-(n-1)*gap)/n);
+  for(let i=0;i<n;i++){
+    const v=arr[i];
+    const h = Math.max(1,(v/maxVal)*(H-4));
+    let color = i%2===0 ? getCss('--bar') : getCss('--bar2');
+    if(doneAll) color = getCss('--mint');
+    else if(active && active.includes(i)){
+      color = type==='compare' ? getCss('--amber') : getCss('--cyan');
+    }
+    ctx.fillStyle = color;
+    const x = i*(barW+gap);
+    ctx.fillRect(x, H-h, barW, h);
+  }
+}
+let _cssCache={};
+function getCss(varName){
+  if(_cssCache[varName]) return _cssCache[varName];
+  const v = getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
+  _cssCache[varName]=v;
+  return v;
+}
+
+/* ============================================================
+   VIEW: SELECT
+   ============================================================ */
+function renderGrids(){
+  const containers = {simple:[],efficient:[],linear:[],meme:[]};
+  ALGOS.forEach((a,i)=>containers[a.cat].push([a,i]));
+  Object.entries(containers).forEach(([cat, list])=>{
+    const el = document.getElementById(CATMAP[cat]);
+    el.innerHTML = list.map(([a,i])=>`
+      <div class="card" data-key="${a.key}">
+        <div class="idx">0x${i.toString(16).padStart(2,'0').toUpperCase()}</div>
+        <h3>${a.name}</h3>
+        <div class="bigo">
+          <span class="badge best">best ${a.best}</span>
+          <span class="badge worst">worst ${a.worst}</span>
+          <span class="badge">space ${a.space}</span>
+        </div>
+      </div>
+    `).join('');
+  });
+  document.querySelectorAll('.card').forEach(card=>{
+    card.addEventListener('click', ()=>openViz(card.dataset.key));
+  });
+}
+
+/* ============================================================
+   VIEW: NAV / ROUTING
+   ============================================================ */
+function showView(id){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.getElementById('nav-select').classList.toggle('active', id!=='view-cmp');
+  document.getElementById('nav-compare').classList.toggle('active', id==='view-cmp');
+}
+document.getElementById('nav-select').addEventListener('click', ()=>showView('view-select'));
+document.getElementById('nav-compare').addEventListener('click', ()=>{ if(!cmpInited) initCompare(); showView('view-cmp'); });
+document.getElementById('cta-compare').addEventListener('click', ()=>{ if(!cmpInited) initCompare(); showView('view-cmp'); });
+document.getElementById('viz-back').addEventListener('click', ()=>showView('view-select'));
+
+/* ============================================================
+   VIEW: SINGLE VISUALIZER
+   ============================================================ */
+const MAX_FRAMES = 1500; // cap animation frames regardless of array size
+const vizState = { key:null, arr:[], mirror:[], timer:null, state:'idle', finalArr:null };
+
+function openViz(key){
+  vizState.key = key;
+  const meta = BYKEY[key];
+  document.getElementById('viz-title').innerHTML = meta.name + `<span class="tag">${meta.cat} sort</span>`;
+  document.getElementById('stat-best').textContent = meta.best;
+  document.getElementById('stat-avg').textContent = meta.avg;
+  document.getElementById('stat-worst').textContent = meta.worst;
+  document.getElementById('stat-space').textContent = meta.space;
+  newVizArray();
+  showView('view-viz');
+}
+
+function currentVizSize(){
+  let n = parseInt(document.getElementById('viz-size').value,10);
+  if(vizState.key==='bitonic') n = nextPow2(n);
+  return n;
+}
+
+function setVizStatus(text, cls){
+  const el = document.getElementById('viz-status');
+  el.textContent = text;
+  el.className = 'statuspill' + (cls ? ' '+cls : '');
+}
+
+function newVizArray(){
+  stopVizPlayback();
+  vizState.state = 'idle';
+  vizState.arr = randomArray(currentVizSize());
+  vizState.mirror = vizState.arr.slice();
+  vizState.finalArr = null;
+  document.getElementById('stat-comp').textContent='0';
+  document.getElementById('stat-writes').textContent='0';
+  document.getElementById('stat-time').textContent='—';
+  document.getElementById('viz-sort').disabled = false;
+  document.getElementById('viz-sort').textContent = '▶ sort';
+  document.getElementById('viz-end').disabled = true;
+  setVizStatus('idle');
+  const canvas = document.getElementById('viz-canvas');
+  drawBars(canvas, vizState.mirror, [], null, 100, false);
+}
+
+function stopVizPlayback(){
+  if(vizState.timer){ clearInterval(vizState.timer); vizState.timer=null; }
+}
+
+function finishVizSort(){
+  stopVizPlayback();
+  vizState.state = 'done';
+  vizState.mirror = vizState.finalArr.slice();
+  vizState.arr = vizState.finalArr.slice(); // persist sorted state until "new array"
+  const canvas = document.getElementById('viz-canvas');
+  const maxVal = Math.max(...vizState.mirror, 100);
+  drawBars(canvas, vizState.mirror, [], null, maxVal, true);
+  document.getElementById('viz-sort').disabled = true;
+  document.getElementById('viz-sort').textContent = '✓ sorted';
+  document.getElementById('viz-end').disabled = true;
+  setVizStatus('done', 'done');
+}
+
+document.getElementById('viz-size').addEventListener('change', newVizArray);
+document.getElementById('viz-shuffle').addEventListener('click', newVizArray);
+
+document.getElementById('viz-end').addEventListener('click', ()=>{
+  if(vizState.state!=='playing') return;
+  finishVizSort();
+});
+
+document.getElementById('viz-sort').addEventListener('click', ()=>{
+  if(vizState.state!=='idle') return;
+  const key = vizState.key;
+  const {trace, timeMs, comparisons, writes, finalArr} = buildTrace(key, vizState.arr);
+  document.getElementById('stat-comp').textContent = comparisons.toLocaleString();
+  document.getElementById('stat-writes').textContent = writes.toLocaleString();
+  document.getElementById('stat-time').textContent = fmtTime(timeMs);
+  vizState.finalArr = finalArr;
+
+  vizState.state = 'playing';
+  document.getElementById('viz-sort').disabled = true;
+  document.getElementById('viz-end').disabled = false;
+  setVizStatus('playing…', 'playing');
+
+  const canvas = document.getElementById('viz-canvas');
+  const speedSlider = document.getElementById('viz-speed');
+  const maxVal = Math.max(...vizState.arr, ...finalArr, 100);
+  const mirror = vizState.mirror; // mutate in place, no per-step copies
+
+  const stepsPerTick = Math.max(1, Math.ceil(trace.length / MAX_FRAMES));
+  let idx = 0;
+
+  function tick(){
+    if(idx>=trace.length){
+      finishVizSort();
+      return;
+    }
+    let lastStep=null;
+    const batchEnd = Math.min(trace.length, idx+stepsPerTick);
+    for(; idx<batchEnd; idx++){
+      const step = trace[idx];
+      applyStep(mirror, step);
+      lastStep = step;
+    }
+    const isDone = lastStep.type==='done';
+    drawBars(canvas, mirror, lastStep.active, lastStep.type, maxVal, isDone);
+  }
+  clearInterval(vizState.timer);
+  const msPerStep = Math.max(1, 220 - (speedSlider.value*2.1));
+  vizState.timer = setInterval(tick, msPerStep);
+});
+
+/* ============================================================
+   VIEW: COMPARE ALL  (bogo sort excluded)
+   ============================================================ */
+let cmpBase = null;
+let cmpPlayers = [];
+let cmpPlaying = false;
+let cmpInited = false;
+const CMP_MAX_FRAMES = 800;
+
+function initCompare(){
+  cmpInited = true;
+  const grid = document.getElementById('cmpgrid');
+  grid.innerHTML = COMPARE_ALGOS.map(a=>`
+    <div class="cmpcard" id="cmpcard-${a.key}">
+      <div class="h"><span class="nm">${a.name}</span><span class="rank" id="rank-${a.key}"></span></div>
+      <canvas id="cv-${a.key}"></canvas>
+      <div class="foot"><span class="mono">${a.worst}</span><span class="t" id="time-${a.key}">ready</span></div>
+    </div>
+  `).join('');
+  newCompareArray();
+}
+
+function newCompareArray(){
+  cmpPlayers.forEach(p=>clearInterval(p.timer));
+  cmpPlayers = [];
+  cmpPlaying = false;
+  document.getElementById('cmp-play').disabled = false;
+  document.getElementById('cmp-play').textContent = '▶ play all';
+  const n = parseInt(document.getElementById('cmp-size').value,10);
+  cmpBase = randomArray(n);
+  const maxVal = Math.max(...cmpBase, 100);
+  COMPARE_ALGOS.forEach(a=>{
+    const size = a.key==='bitonic' ? nextPow2(n) : n;
+    const seedArr = a.key==='bitonic' ? randomArray(size) : cmpBase;
+    const canvas = document.getElementById('cv-'+a.key);
+    drawBars(canvas, seedArr, [], null, maxVal, false);
+    document.getElementById('time-'+a.key).textContent = 'ready';
+    document.getElementById('time-'+a.key).className = 't';
+    document.getElementById('rank-'+a.key).textContent = '';
+    document.getElementById('cmpcard-'+a.key).classList.remove('done');
+  });
+}
+
+document.getElementById('cmp-size').addEventListener('change', newCompareArray);
+document.getElementById('cmp-shuffle').addEventListener('click', newCompareArray);
+
+document.getElementById('cmp-play').addEventListener('click', ()=>{
+  if(cmpPlaying) return;
+  cmpPlaying = true;
+  const playBtn = document.getElementById('cmp-play');
+  playBtn.disabled = true;
+  playBtn.textContent = 'computing…';
+
+  // defer the heavy synchronous work one tick so the disabled/computing state paints first
+  setTimeout(runCompareAll, 10);
+});
+
+function runCompareAll(){
+  const playBtn = document.getElementById('cmp-play');
+  playBtn.textContent = '▶ playing…';
+  const n = parseInt(document.getElementById('cmp-size').value,10);
+  const globalMax = Math.max(...cmpBase, 100);
+  let finishedCount = 0;
+  const total = COMPARE_ALGOS.length;
+
+  COMPARE_ALGOS.forEach(a=>{
+    const size = a.key==='bitonic' ? nextPow2(n) : n;
+    const seedArr = a.key==='bitonic' ? randomArray(size) : cmpBase;
+    const {trace, timeMs, comparisons, finalArr} = buildTrace(a.key, seedArr);
+    const canvas = document.getElementById('cv-'+a.key);
+    const timeEl = document.getElementById('time-'+a.key);
+    const cardEl = document.getElementById('cmpcard-'+a.key);
+    const rankEl = document.getElementById('rank-'+a.key);
+    timeEl.textContent = 'running…';
+
+    const mirror = seedArr.slice();
+    const maxVal = a.key==='bitonic' ? Math.max(...seedArr,100) : globalMax;
+    const stepsPerTick = Math.max(1, Math.ceil(trace.length / CMP_MAX_FRAMES));
+    let idx=0;
+    const msPerStep = 6;
+    const timer = setInterval(()=>{
+      if(idx>=trace.length){
+        clearInterval(timer);
+        drawBars(canvas, finalArr, [], null, maxVal, true);
+        timeEl.textContent = fmtTime(timeMs) + ' · ' + comparisons.toLocaleString() + ' cmp';
+        cardEl.classList.add('done');
+        finishedCount++;
+        rankEl.textContent = '#'+finishedCount;
+        if(finishedCount===total){
+          playBtn.disabled = false;
+          playBtn.textContent = '▶ play all';
+          cmpPlaying = false;
+        }
+        return;
+      }
+      let lastStep=null;
+      const batchEnd = Math.min(trace.length, idx+stepsPerTick);
+      for(; idx<batchEnd; idx++){ const step=trace[idx]; applyStep(mirror, step); lastStep=step; }
+      drawBars(canvas, mirror, lastStep.active, lastStep.type, maxVal, lastStep.type==='done');
+    }, msPerStep);
+    cmpPlayers.push({key:a.key, timer});
+  });
+}
+
+/* ============================================================
+   INIT
+   ============================================================ */
+renderGrids();
+</script>
+</body>
+</html>
